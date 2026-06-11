@@ -6,21 +6,30 @@
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [
     "http://localhost:8000/*",
-    "https://*.tinder.com/*",
-    "https://*.hinge.co/*"
+    "https://*.okcupid.com/*"
   ],
   "background": {
     "service_worker": "background/service_worker.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://*.tinder.com/*", "https://*.hinge.co/*"],
+      "matches": ["https://*.okcupid.com/*"],
       "js": ["content/dom_scraper.js", "content/overlay.js"],
       "run_at": "document_idle"
     }
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "A-MORE"
+    "default_title": "A-MORE",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }
