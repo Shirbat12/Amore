@@ -62,14 +62,16 @@ offline tagger. To use the real model, copy `.env.example` to `.env` and set
   `dashboard/index.html?api=http://localhost:8000&user=demo_user`.
 - **Questionnaire:** open `questionnaire/vibe_form.html?user=demo_user`.
 - **Extension:** `chrome://extensions` → *Load unpacked* → select `extension/`.
+  Targets the OkCupid web client (`okcupid.com`); the overlay needs the live DOM
+  selectors filled in (`extension/content/dom_scraper.js`).
 
 ## Team / ownership
 - **Shir** — data-science & learning core (`pipeline/revealed_preferences.py`,
   `pipeline/predictor.py`, `evaluation/`, `data/`).
-- **Michal** — backend, NLP & data layer (`server/app.py`, `api/`, `nlp/`,
+- **Liel** — backend, NLP & data layer (`server/app.py`, `api/`, `nlp/`,
   `models/`, `db/`, `pipeline/quantify_experience.py`).
-- **Liel** — front-end (`extension/`, `questionnaire/`, `dashboard/`,
-  `pipeline/presentation.py`).
+- **Michal** — front-end (`extension/`, `questionnaire/`, `dashboard/`,
+  `assets/`, `pipeline/presentation.py`).
 
 ## Repo layout
 ```
@@ -77,6 +79,7 @@ server/        FastAPI app + pipeline + NLP + models + db
 extension/     Chrome MV3 extension (scraper, overlay, popup)
 questionnaire/ post-date Vibe form
 dashboard/     decision-support dashboard (Chart.js)
+assets/        shared front-end design tokens (theme.css)
 evaluation/    KPIs + ablation + experiment protocol
 data/          tag taxonomy + synthetic sample generator
 tests/         pytest suite
