@@ -1,5 +1,6 @@
-// Correlation "heatmap" rendered as a diverging horizontal bar chart:
-// rho drives the bar length/color, q-value drives opacity (section 2.3.4).
+// Correlation "heatmap" rendered as a diverging horizontal bar chart: rho drives
+// the bar length, sign drives the color (rose = positive, slate = negative), and
+// the q-value drives opacity so significant links read as solid (section 2.3.4).
 function renderHeatmap(rows) {
   const el = document.getElementById("heatmap");
   if (!rows || !rows.length) { el.replaceWith(emptyNote()); return; }
@@ -8,8 +9,8 @@ function renderHeatmap(rows) {
   const colors = rows.map((r) => {
     const alpha = Math.max(0.2, 1 - r.q);            // significant -> opaque
     return r.rho >= 0
-      ? `rgba(46,158,91,${alpha})`
-      : `rgba(192,57,43,${alpha})`;
+      ? `rgba(193,110,127,${alpha})`                 // rose, positive
+      : `rgba(126,139,163,${alpha})`;                // slate, negative
   });
   new Chart(el, {
     type: "bar",

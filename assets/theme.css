@@ -1,0 +1,218 @@
+/* A-MORE shared design language — a "vintage love letter": warm ivory paper,
+   antique-gold hairlines, dusty rose, deep-plum ink. Imported by the dashboard
+   and the questionnaire; the extension popup mirrors these same values. The two
+   fonts (Frank Ruhl Libre for display, Assistant for body) are loaded with a
+   <link> in each page so both Hebrew and Latin text share one voice. */
+
+:root {
+  /* palette — 6 colors */
+  --ivory: #fbf4ef;          /* page background, warm paper */
+  --blush: #f6e3dc;          /* soft pink surface tint */
+  --surface: #fffbf8;        /* card surface, warm white */
+  --rose: #c16e7f;           /* primary action / accent */
+  --rose-deep: #a0506a;      /* hover / pressed */
+  --gold: #c2a15a;           /* antique-gold accent + hairlines */
+  --gold-line: rgba(194, 161, 90, 0.34);
+  --ink: #4a2e3a;            /* text, deep plum (softer than black) */
+  --mauve: #9a7c86;          /* secondary / muted text */
+  --slate: #7e8ba3;          /* cool tone, used only for negative data */
+
+  /* type */
+  --serif: "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
+  --sans: "Assistant", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* shape + depth */
+  --r: 18px;
+  --r-sm: 12px;
+  --r-pill: 999px;
+  --shadow: 0 10px 30px rgba(160, 80, 106, 0.10);
+  --shadow-sm: 0 4px 14px rgba(160, 80, 106, 0.10);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background:
+    radial-gradient(1100px 560px at 100% -12%, var(--blush), transparent 60%),
+    var(--ivory);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- page header / wordmark ---------------------------------------------- */
+.amore-header { text-align: center; padding: 34px 20px 8px; }
+.amore-wordmark {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  font-size: 30px;
+  margin: 0;
+  color: var(--ink);
+}
+.amore-tagline { font-size: 13px; color: var(--mauve); margin: 6px 0 0; }
+
+/* ---- signature element: gold hairline divider with a centered heart ------ */
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 360px;
+  margin: 14px auto 0;
+  color: var(--gold);
+}
+.rule::before, .rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--gold-line);
+}
+.rule .heart { font-size: 12px; line-height: 1; }
+
+/* ---- cards --------------------------------------------------------------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.card-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--ink);
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title::before { content: "\276E"; color: var(--gold); font-size: 13px; }
+
+/* ---- buttons ------------------------------------------------------------- */
+.btn {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  border: 0;
+  border-radius: var(--r-pill);
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.2s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn-rose {
+  background: var(--rose);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(193, 110, 127, 0.30);
+}
+.btn-rose:hover { background: var(--rose-deep); }
+.btn-ghost {
+  background: transparent;
+  color: var(--rose-deep);
+  border: 1px solid var(--gold-line);
+}
+.btn-ghost:hover { background: var(--blush); }
+
+/* ---- insight list (love-letter style) ------------------------------------ */
+.insights { list-style: none; margin: 0; padding: 0; }
+.insights li {
+  position: relative;
+  padding-inline-start: 24px;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  font-size: 15px;
+}
+.insights li::before {
+  content: "\2665";                 /* heart */
+  position: absolute;
+  inset-inline-start: 0;
+  top: 1px;
+  color: var(--rose);
+  font-size: 13px;
+}
+
+/* ---- selectable tag pills ------------------------------------------------ */
+.pill {
+  border: 1px solid var(--gold-line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--r-pill);
+  padding: 7px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.pill:hover { border-color: var(--rose); }
+.pill.on { background: var(--rose); color: #fff; border-color: var(--rose); }
+
+/* ---- VAS range sliders (rose-gold track) --------------------------------- */
+input[type="range"].vas {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--gold), var(--rose));
+  outline: none;
+}
+input[type="range"].vas::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--rose);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+input[type="range"].vas::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--rose);
+  cursor: pointer;
+}
+
+/* ---- text fields --------------------------------------------------------- */
+textarea, input[type="text"] {
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  width: 100%;
+}
+textarea:focus, input[type="text"]:focus {
+  outline: none;
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px rgba(193, 110, 127, 0.14);
+}
+
+/* ---- loading / error banners --------------------------------------------- */
+.banner { border-radius: var(--r); padding: 16px 18px; font-size: 14px; line-height: 1.6; }
+.banner.loading { background: var(--blush); color: var(--rose-deep); }
+.banner.error { background: #f7e0e0; color: #9b3b46; }
+.banner code { background: rgba(74, 46, 58, 0.07); padding: 1px 5px; border-radius: 4px; }
+
+/* ---- shared spinner ------------------------------------------------------ */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--gold-line);
+  border-top-color: var(--rose);
+  border-radius: 50%;
+  animation: amore-spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-inline-end: 8px;
+}
+@keyframes amore-spin { to { transform: rotate(360deg); } }
+
+/* ---- empty-state note ---------------------------------------------------- */
+.empty { color: var(--mauve); font-size: 13px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

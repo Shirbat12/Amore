@@ -1,36 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>A-MORE — Insights</title>
+  <title>A-MORE — תובנות</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet" />
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4/build/index.umd.min.js"></script>
+
+  <link rel="stylesheet" href="../assets/theme.css" />
   <style>
-    body { font-family: system-ui, sans-serif; margin: 0; background: #f4f7fb;
-           color: #1f3a5f; }
-    header { background: #1f3a5f; color: #fff; padding: 16px 24px; }
-    header h1 { margin: 0; font-size: 20px; }
-    main { max-width: 1040px; margin: 0 auto; padding: 20px;
+    main { max-width: 1040px; margin: 0 auto; padding: 16px 20px 44px;
            display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-    .card { background: #fff; border-radius: 12px; padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-    .card h2 { font-size: 15px; margin: 0 0 10px; color: #2e6fb7; }
     .full { grid-column: 1 / -1; }
-    #insights li { margin-bottom: 6px; }
-    .empty { color: #999; font-size: 13px; }
+    #banner { grid-column: 1 / -1; }
+    canvas { max-height: 260px; }
+    @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <header><h1>A-MORE — Personal Insights</h1></header>
+  <header class="amore-header">
+    <h1 class="amore-wordmark">A-MORE</h1>
+    <p class="amore-tagline" id="subtitle">התובנות האישיות שלך</p>
+    <div class="rule"><span class="heart">&#9829;</span></div>
+  </header>
+
   <main>
-    <div class="card full">
-      <h2>תובנות</h2>
-      <ul id="insights"></ul>
-    </div>
-    <div class="card"><h2>מפת חום קורלציות</h2><canvas id="heatmap"></canvas></div>
-    <div class="card"><h2>משפך דייטים</h2><canvas id="funnel"></canvas></div>
-    <div class="card"><h2>חיזוי מול בפועל</h2><canvas id="scatter"></canvas></div>
-    <div class="card"><h2>ציון VAS לפי תגית</h2><canvas id="boxplots"></canvas></div>
+    <div id="banner"></div>
+
+    <section class="card full">
+      <h2 class="card-title">תובנות</h2>
+      <ul class="insights" id="insights"></ul>
+    </section>
+    <section class="card"><h2 class="card-title">מפת חום קורלציות</h2><canvas id="heatmap"></canvas></section>
+    <section class="card"><h2 class="card-title">משפך דייטים</h2><canvas id="funnel"></canvas></section>
+    <section class="card"><h2 class="card-title">חיזוי מול בפועל</h2><canvas id="scatter"></canvas></section>
+    <section class="card"><h2 class="card-title">ציון VAS לפי תגית</h2><canvas id="boxplots"></canvas></section>
   </main>
 
   <script src="src/api.js"></script>
@@ -39,15 +48,67 @@
   <script src="src/scatter.js"></script>
   <script src="src/boxplots.js"></script>
   <script>
-    (async () => {
-      const data = await fetchInsights();
-      const ul = document.getElementById("insights");
-      ul.innerHTML = (data.insights || []).map((t) => `<li>${t}</li>`).join("");
-      renderHeatmap(data.heatmap);
-      renderFunnel(data.funnel);
-      renderScatter(data.scatter);
-      renderBoxplots(data.boxplots);
-    })();
+    // Dashboard bootstrap: fetch insights, render the four charts, and surface a
+    // clear loading/error state instead of failing silently when the API is down
+    // or the user/api query params are wrong.
+    const banner = document.getElementById("banner");
+    const subtitle = document.getElementById("subtitle");
+
+    // Make the chart text match the brand voice (sans body, mauve labels).
+    Chart.defaults.font.family = "'Assistant', system-ui, sans-serif";
+    Chart.defaults.color = "#9a7c86";
+
+    // Show what we're pointing at up front — most "empty dashboard" problems are
+    // really a wrong ?user= or ?api= param, so make them visible immediately.
+    // API_BASE and USER_ID come from src/api.js (shared global scope).
+    subtitle.textContent = `${USER_ID} · ${API_BASE}`;
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function showLoading() {
+      banner.className = "banner loading";
+      banner.style.display = "";
+      banner.innerHTML = `<span class="spinner"></span> טוען נתונים…`;
+    }
+
+    function hideBanner() {
+      banner.style.display = "none";
+      banner.innerHTML = "";
+    }
+
+    function showError(err) {
+      banner.className = "banner error";
+      banner.style.display = "";
+      banner.innerHTML = `
+        <strong>לא הצלחתי לטעון נתונים.</strong><br>
+        ${escapeHtml(err.message || err)}<br>
+        ודאי שהשרת רץ (<code>uvicorn server.app:app --reload</code>) ושהפרמטרים נכונים —
+        משתמש <code>${escapeHtml(USER_ID)}</code>, API <code>${escapeHtml(API_BASE)}</code>.
+        <br><br><button class="btn btn-rose" id="retry">נסי שוב</button>`;
+      document.getElementById("retry").addEventListener("click", load);
+    }
+
+    async function load() {
+      showLoading();
+      try {
+        const data = await fetchInsights();
+        hideBanner();
+        const ul = document.getElementById("insights");
+        ul.innerHTML = (data.insights || []).map((t) => `<li>${escapeHtml(t)}</li>`).join("");
+        renderHeatmap(data.heatmap);
+        renderFunnel(data.funnel);
+        renderScatter(data.scatter);
+        renderBoxplots(data.boxplots);
+        subtitle.textContent = `${USER_ID} · ${data.n_dates} דייטים · ${API_BASE}`;
+      } catch (err) {
+        showError(err);
+      }
+    }
+
+    load();
   </script>
 </body>
 </html>
