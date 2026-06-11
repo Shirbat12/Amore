@@ -26,3 +26,17 @@ CREATE TABLE IF NOT EXISTS dates (
 );
 
 CREATE INDEX IF NOT EXISTS idx_dates_user ON dates (user_id);
+
+-- Profile selections: every Like / Pass the user makes in the app, captured by
+-- the extension. Feeds the Decision-Alignment KPI (section 4.1) - did the user
+-- follow A-MORE's guidance toward profiles carrying their positive features?
+CREATE TABLE IF NOT EXISTS selections (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     TEXT NOT NULL,
+    action      TEXT NOT NULL,        -- 'like' or 'pass'
+    profile     TEXT,                 -- JSON list of dry tokens at click time
+    created_at  TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_selections_user ON selections (user_id);
