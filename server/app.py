@@ -12,7 +12,12 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from server.api import routes_feedback, routes_insights, routes_score
+from server.api import (
+    routes_feedback,
+    routes_insights,
+    routes_score,
+    routes_selection,
+)
 from server.db import relational
 
 app = FastAPI(title="A-MORE", version="0.1.0",
@@ -28,6 +33,7 @@ app.add_middleware(
 app.include_router(routes_score.router)
 app.include_router(routes_feedback.router)
 app.include_router(routes_insights.router)
+app.include_router(routes_selection.router)
 
 
 @app.on_event("startup")

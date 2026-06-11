@@ -12,7 +12,7 @@ from scipy.stats import spearmanr
 
 from server import config
 from server.models import DateRecord
-from server.pipeline.predictor import fit_predictor
+from server.pipeline.predictor import fit_predictor, learn_correlations
 
 
 # 1. Pairing effectiveness - conversion ratio (second / first dates) ----------
@@ -42,6 +42,41 @@ def decision_alignment(
         1 for p in selected_profiles if positive_features.intersection(p)
     )
     return 100.0 * hits / len(selected_profiles)
+
+
+def positive_features_from_history(history: List[DateRecord], q_max: float = None) -> set:
+    """The user's significant *positive* dry features - the ones A-MORE endorses.
+
+    Reads the per-user Spearman correlations and keeps profile tokens whose link
+    to the VAS outcome is positive and statistically significant (q <= cutoff).
+    This is the principled source of `positive_features` for decision_alignment().
+    """
+    q_max = config.SIGNIFICANT_Q if q_max is None else q_max
+    corr = learn_correlations(history)
+    return {
+        name.split("profile:", 1)[1]
+        for name, (rho, q) in corr.items()
+        if name.startswith("profile:") and rho > 0 and q <= q_max
+    }
+
+
+def decision_alignment_report(history: List[DateRecord], selections: List[dict]) -> dict:
+    """Decision-Alignment KPI over logged selections.
+
+    `selections` is a list of {"action": "like"|"pass", "profile": [tokens...]}.
+    Returns the alignment rate among *liked* profiles, how many were counted, and
+    which positive features were used - or rate=None when there isn't enough
+    signal yet (no likes, or no significant positive features), so callers can
+    distinguish "0% aligned" from "not enough data".
+    """
+    liked = [s["profile"] for s in selections if s.get("action") == "like"]
+    positives = positive_features_from_history(history)
+    rate = decision_alignment(liked, positives) if liked and positives else None
+    return {
+        "rate": rate,
+        "n_selected": len(liked),
+        "positive_features": sorted(positives),
+    }
 
 
 # 3. Usability - SUS ----------------------------------------------------------

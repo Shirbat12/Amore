@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from typing import List, Optional
+from datetime import datetime, timezone
+from typing import Dict, List, Optional
 
 from server import config
 from server.models import DateRecord, User
@@ -129,3 +130,36 @@ def get_history(user_id: str) -> List[DateRecord]:
             "SELECT * FROM dates WHERE user_id = ? ORDER BY created_at", (user_id,)
         ).fetchall()
     return [_row_to_record(r) for r in rows]
+
+
+# --- selections (Decision-Alignment KPI) ---------------------------------
+def save_selection(user_id: str, action: str, profile: List[str]) -> None:
+    """Persist one Like/Pass event with the profile tokens seen at click time."""
+    with _connect() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,)
+        )
+        conn.execute(
+            """INSERT INTO selections (user_id, action, profile, created_at)
+               VALUES (?, ?, ?, ?)""",
+            (user_id, action, json.dumps(profile, ensure_ascii=False),
+             datetime.now(timezone.utc).isoformat()),
+        )
+
+
+def get_selections(user_id: str, action: Optional[str] = None) -> List[Dict]:
+    """Return the user's selection events, optionally filtered to one action."""
+    query = "SELECT action, profile, created_at FROM selections WHERE user_id = ?"
+    params: list = [user_id]
+    if action is not None:
+        query += " AND action = ?"
+        params.append(action)
+    query += " ORDER BY created_at"
+    with _connect() as conn:
+        rows = conn.execute(query, params).fetchall()
+    return [
+        {"action": r["action"],
+         "profile": json.loads(r["profile"] or "[]"),
+         "created_at": r["created_at"]}
+        for r in rows
+    ]
