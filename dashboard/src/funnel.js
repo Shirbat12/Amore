@@ -1,4 +1,4 @@
-// First dates -> second-date intent (section 2.3.4).
+// First dates -> second-date intent (section 2.3.4), in the brand palette.
 function renderFunnel(f) {
   const el = document.getElementById("funnel");
   if (!f || !f.first_dates) { el.replaceWith(emptyNote()); return; }
@@ -8,7 +8,7 @@ function renderFunnel(f) {
       labels: ["דייטים ראשונים", "דייט שני (כן)", "אולי"],
       datasets: [{
         data: [f.first_dates, f.second_dates, f.maybe],
-        backgroundColor: ["#2e6fb7", "#2e9e5b", "#d9a300"],
+        backgroundColor: ["#c16e7f", "#c2a15a", "#d9b8c0"],
       }],
     },
     options: { plugins: { legend: { display: false } } },

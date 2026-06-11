@@ -8,7 +8,7 @@ function renderScatter(points) {
       datasets: [{
         label: "תחזית מול בפועל",
         data: points.map((p) => ({ x: p.predicted, y: p.actual })),
-        backgroundColor: "#2e6fb7",
+        backgroundColor: "#c16e7f",
       }],
     },
     options: {

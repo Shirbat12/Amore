@@ -37,11 +37,11 @@ function renderRealBoxplots(el, byTag, tags) {
       datasets: [{
         label: "התפלגות VAS",
         data: tags.map((t) => byTag[t]),       // one array of values per tag
-        backgroundColor: "rgba(46,111,183,.35)",
-        borderColor: "#2e6fb7",
+        backgroundColor: "rgba(193,110,127,.30)",
+        borderColor: "#c16e7f",
         borderWidth: 1,
         itemRadius: 2,                          // draw each date as a small dot
-        outlierBackgroundColor: "#c0392b",      // flag outlier dates in red
+        outlierBackgroundColor: "#a0506a",      // flag outlier dates in deep rose
       }],
     },
     options: {
@@ -66,10 +66,10 @@ function renderRangeFallback(el, byTag, tags) {
       labels: tags,
       datasets: [
         { label: "טווח VAS", data: stats.map((s) => [s.min, s.max]),
-          backgroundColor: "rgba(46,111,183,.35)" },
+          backgroundColor: "rgba(193,110,127,.30)" },
         { label: "ממוצע", type: "scatter",
           data: stats.map((s, i) => ({ x: i, y: s.mean })),
-          backgroundColor: "#c0392b" },
+          backgroundColor: "#a0506a" },
       ],
     },
     options: { scales: { y: { min: 0, max: 100 } } },
