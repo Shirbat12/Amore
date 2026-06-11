@@ -10,6 +10,7 @@
            color: #1f3a5f; }
     header { background: #1f3a5f; color: #fff; padding: 16px 24px; }
     header h1 { margin: 0; font-size: 20px; }
+    header .subtitle { font-size: 12px; opacity: .8; margin-top: 4px; }
     main { max-width: 1040px; margin: 0 auto; padding: 20px;
            display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     .card { background: #fff; border-radius: 12px; padding: 16px;
@@ -18,11 +19,31 @@
     .full { grid-column: 1 / -1; }
     #insights li { margin-bottom: 6px; }
     .empty { color: #999; font-size: 13px; }
+
+    /* Loading + error banner (spans the full grid width). */
+    #banner { grid-column: 1 / -1; border-radius: 12px; padding: 16px;
+              font-size: 14px; line-height: 1.6; }
+    #banner.loading { background: #eef3fb; color: #2e6fb7; }
+    #banner.error { background: #fdecea; color: #c0392b; }
+    #banner code { background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 4px;
+                   font-size: 13px; }
+    #banner button { margin-top: 10px; background: #2e6fb7; color: #fff; border: 0;
+                     border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #cdd9e8;
+               border-top-color: #2e6fb7; border-radius: 50%; animation: spin .8s linear infinite;
+               vertical-align: middle; margin-inline-end: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <header><h1>A-MORE — Personal Insights</h1></header>
+  <header>
+    <h1>A-MORE — Personal Insights</h1>
+    <div class="subtitle" id="subtitle"></div>
+  </header>
   <main>
+    <!-- Loading / error messages render here; hidden once data arrives. -->
+    <div id="banner"></div>
+
     <div class="card full">
       <h2>תובנות</h2>
       <ul id="insights"></ul>
@@ -39,15 +60,64 @@
   <script src="src/scatter.js"></script>
   <script src="src/boxplots.js"></script>
   <script>
-    (async () => {
-      const data = await fetchInsights();
-      const ul = document.getElementById("insights");
-      ul.innerHTML = (data.insights || []).map((t) => `<li>${t}</li>`).join("");
-      renderHeatmap(data.heatmap);
-      renderFunnel(data.funnel);
-      renderScatter(data.scatter);
-      renderBoxplots(data.boxplots);
-    })();
+    // Dashboard bootstrap: fetch insights, render the four charts, and surface
+    // a clear loading/error state instead of failing silently when the API is
+    // down or the user/api query params are wrong.
+    const banner = document.getElementById("banner");
+    const subtitle = document.getElementById("subtitle");
+
+    // Show what we're pointing at up front — most "empty dashboard" problems are
+    // really a wrong ?user= or ?api= param, so make them visible immediately.
+    // API_BASE and USER_ID are defined in src/api.js (shared global scope).
+    subtitle.textContent = `משתמש: ${USER_ID} · API: ${API_BASE}`;
+
+    // Escape user/URL-derived text before putting it in innerHTML.
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function showLoading() {
+      banner.className = "loading";
+      banner.style.display = "";
+      banner.innerHTML = `<span class="spinner"></span> טוען נתונים…`;
+    }
+
+    function hideBanner() {
+      banner.style.display = "none";
+      banner.innerHTML = "";
+    }
+
+    function showError(err) {
+      banner.className = "error";
+      banner.style.display = "";
+      banner.innerHTML = `
+        <strong>לא הצלחתי לטעון נתונים.</strong><br>
+        ${escapeHtml(err.message || err)}<br>
+        ודאי שהשרת רץ (<code>uvicorn server.app:app --reload</code>) ושהפרמטרים נכונים —
+        משתמש <code>${escapeHtml(USER_ID)}</code>, API <code>${escapeHtml(API_BASE)}</code>.
+        <br><button id="retry">נסי שוב</button>`;
+      document.getElementById("retry").addEventListener("click", load);
+    }
+
+    async function load() {
+      showLoading();
+      try {
+        const data = await fetchInsights();
+        hideBanner();
+        const ul = document.getElementById("insights");
+        ul.innerHTML = (data.insights || []).map((t) => `<li>${escapeHtml(t)}</li>`).join("");
+        renderHeatmap(data.heatmap);
+        renderFunnel(data.funnel);
+        renderScatter(data.scatter);
+        renderBoxplots(data.boxplots);
+        subtitle.textContent = `משתמש: ${USER_ID} · ${data.n_dates} דייטים · API: ${API_BASE}`;
+      } catch (err) {
+        showError(err);
+      }
+    }
+
+    load();
   </script>
 </body>
 </html>
