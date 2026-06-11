@@ -14,7 +14,11 @@
   "content_scripts": [
     {
       "matches": ["https://*.okcupid.com/*"],
-      "js": ["content/dom_scraper.js", "content/overlay.js"],
+      "js": [
+        "content/dom_scraper.js",
+        "content/overlay.js",
+        "content/selection_logger.js"
+      ],
       "run_at": "document_idle"
     }
   ],

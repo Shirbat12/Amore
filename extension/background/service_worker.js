@@ -27,12 +27,28 @@ async function fetchScore(profile) {
   return result;
 }
 
+// Forward a like/pass selection to the backend (Decision-Alignment KPI).
+// Fire-and-forget: failures are logged, never surfaced to the user.
+async function logSelection({ action, profile }) {
+  const { apiBase, userId } = await settings();
+  const res = await fetch(`${apiBase}/selection`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId, action, profile }),
+  });
+  if (!res.ok) throw new Error(`selection failed: ${res.status}`);
+}
+
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === "SCORE_PROFILE") {
     fetchScore(msg.profile)
       .then(sendResponse)
       .catch((e) => sendResponse({ error: String(e) }));
     return true; // keep the message channel open for the async reply
+  }
+  if (msg.type === "LOG_SELECTION") {
+    logSelection(msg).catch((e) => console.debug("[A-MORE] selection log failed:", e));
+    return false; // no response expected
   }
   return false;
 });
