@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>שאלון Vibe - A-MORE</title>
+  <style>
+    body { font-family: system-ui, "Segoe UI", sans-serif; max-width: 540px;
+           margin: 0 auto; padding: 20px; color: #1f3a5f; background: #f7f9fc; }
+    h1 { font-size: 22px; }
+    .card { background: #fff; border-radius: 12px; padding: 16px 18px;
+            margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    label.q { font-weight: 600; display: block; margin-bottom: 8px; }
+    input[type="range"] { width: 100%; }
+    .ends { display: flex; justify-content: space-between; font-size: 12px; color: #888; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tags button { border: 1px solid #cdd9e8; background: #fff; border-radius: 999px;
+                   padding: 6px 12px; cursor: pointer; font-size: 13px; }
+    .tags button.on { background: #2e6fb7; color: #fff; border-color: #2e6fb7; }
+    textarea { width: 100%; box-sizing: border-box; min-height: 64px; }
+    .intent button { margin-inline-end: 8px; }
+    #submit { background: #2e6fb7; color: #fff; border: 0; border-radius: 8px;
+              padding: 12px 18px; font-size: 16px; cursor: pointer; width: 100%; }
+    #status { text-align: center; margin-top: 10px; min-height: 18px; }
+  </style>
+</head>
+<body>
+  <h1>איך היה הדייט? 💬</h1>
+
+  <div class="card">
+    <label class="q">עד כמה המפגש היה מעניין והשיחה זרמה?</label>
+    <input type="range" id="interest_flow" min="0" max="100" value="50" />
+    <div class="ends"><span>משעמם ותקוע</span><span>מרתק, הזמן טס</span></div>
+  </div>
+
+  <div class="card">
+    <label class="q">האם הרגשת ניצוץ או משיכה רומנטית?</label>
+    <input type="range" id="attraction" min="0" max="100" value="50" />
+    <div class="ends"><span>ידידותי בלבד</span><span>משיכה חזקה</span></div>
+  </div>
+
+  <div class="card">
+    <label class="q">עד כמה האדם תאם לפרופיל ולציפיות?</label>
+    <input type="range" id="reality_match" min="0" max="100" value="50" />
+    <div class="ends"><span>אין קשר לפרופיל</span><span>התאמה מלאה</span></div>
+  </div>
+
+  <div class="card">
+    <label class="q">עד כמה הרגשת בנוח ובמרחב בטוח?</label>
+    <input type="range" id="comfort" min="0" max="100" value="50" />
+    <div class="ends"><span>חוסר נוחות</span><span>נינוחות מלאה</span></div>
+  </div>
+
+  <div class="card">
+    <label class="q">על מה דיברתם? (עד 3)</label>
+    <div class="tags" id="topic_tags"></div>
+  </div>
+
+  <div class="card">
+    <label class="q">איך הייתה האווירה? (עד 3)</label>
+    <div class="tags" id="vibe_tags"></div>
+  </div>
+
+  <div class="card intent">
+    <label class="q">תרצה/י דייט שני?</label>
+    <button data-intent="yes">כן</button>
+    <button data-intent="maybe">אולי</button>
+    <button data-intent="no">לא</button>
+  </div>
+
+  <div class="card">
+    <label class="q">ספר/י במילים שלך על הדייט:</label>
+    <textarea id="free_text" placeholder="היה ממש כיף, הוא היה מצחיק ודברן..."></textarea>
+  </div>
+
+  <button id="submit">שליחה</button>
+  <p id="status"></p>
+
+  <script src="vibe_form.js"></script>
+</body>
+</html>

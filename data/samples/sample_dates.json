@@ -1,0 +1,662 @@
+[
+  {
+    "id": "658820beee2d42f9a7322a0a59292f2d",
+    "user_id": "demo_user",
+    "vas": 70.2,
+    "vas_scores": {
+      "attraction": 70.2
+    },
+    "profile": [
+      "interest:travel",
+      "hobby:gaming"
+    ],
+    "tags": [
+      "זורם בשיחה"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.4,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.350252+00:00"
+  },
+  {
+    "id": "748c120e654047f9be23c9bb09f908c8",
+    "user_id": "demo_user",
+    "vas": 81.9,
+    "vas_scores": {
+      "attraction": 81.9
+    },
+    "profile": [
+      "age:23-26",
+      "interest:travel"
+    ],
+    "tags": [
+      "מצחיק",
+      "זורם בשיחה",
+      "תוסס"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.64,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.351240+00:00"
+  },
+  {
+    "id": "8282d290ff0d429b8a7c31725269e1c0",
+    "user_id": "demo_user",
+    "vas": 43.8,
+    "vas_scores": {
+      "attraction": 43.8
+    },
+    "profile": [
+      "interest:sports",
+      "hobby:gaming"
+    ],
+    "tags": [],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.12,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.351240+00:00"
+  },
+  {
+    "id": "6f6111afb9f846c4926186fb4563cd60",
+    "user_id": "demo_user",
+    "vas": 55.9,
+    "vas_scores": {
+      "attraction": 55.9
+    },
+    "profile": [
+      "age:27-30",
+      "hobby:cooking"
+    ],
+    "tags": [
+      "חמים"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.12,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.351240+00:00"
+  },
+  {
+    "id": "0f79ec8b76764c30b3a2542f129c3290",
+    "user_id": "demo_user",
+    "vas": 64.2,
+    "vas_scores": {
+      "attraction": 64.2
+    },
+    "profile": [
+      "age:23-26",
+      "interest:music"
+    ],
+    "tags": [
+      "מצחיק"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.28,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.351240+00:00"
+  },
+  {
+    "id": "881ca4120bf04c0c937e94f7687d7497",
+    "user_id": "demo_user",
+    "vas": 49.8,
+    "vas_scores": {
+      "attraction": 49.8
+    },
+    "profile": [
+      "interest:finance",
+      "interest:music",
+      "age:23-26"
+    ],
+    "tags": [
+      "משעמם",
+      "מצחיק"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.0,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.351240+00:00"
+  },
+  {
+    "id": "90afab9740424a80abd653732e1fc98f",
+    "user_id": "demo_user",
+    "vas": 57.6,
+    "vas_scores": {
+      "attraction": 57.6
+    },
+    "profile": [
+      "interest:finance",
+      "hobby:cooking",
+      "interest:music"
+    ],
+    "tags": [
+      "מרוכז בעצמו",
+      "אכפתי",
+      "אנרגטי",
+      "מצחיק"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.15,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.351240+00:00"
+  },
+  {
+    "id": "74660140975d4e57930c6cfc7cd9e2b9",
+    "user_id": "demo_user",
+    "vas": 46.5,
+    "vas_scores": {
+      "attraction": 46.5
+    },
+    "profile": [
+      "interest:sports",
+      "age:23-26"
+    ],
+    "tags": [],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.07,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "4efcad64d6f4486a82cd34a4721c4314",
+    "user_id": "demo_user",
+    "vas": 52.3,
+    "vas_scores": {
+      "attraction": 52.3
+    },
+    "profile": [
+      "age:23-26",
+      "interest:music"
+    ],
+    "tags": [
+      "אנרגטי",
+      "מצחיק"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.05,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "b2a21eb7424b4cf2b0801bafb9299bb4",
+    "user_id": "demo_user",
+    "vas": 40.8,
+    "vas_scores": {
+      "attraction": 40.8
+    },
+    "profile": [
+      "interest:finance",
+      "hobby:cooking",
+      "hobby:gaming"
+    ],
+    "tags": [
+      "משעמם",
+      "חמים",
+      "אכפתי"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.18,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "18156d34cb9649c1a65dcafe8f38519a",
+    "user_id": "demo_user",
+    "vas": 49.3,
+    "vas_scores": {
+      "attraction": 49.3
+    },
+    "profile": [
+      "hobby:gaming",
+      "age:23-26"
+    ],
+    "tags": [],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.01,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "8a4297082ac34847a3de25153ba74c78",
+    "user_id": "demo_user",
+    "vas": 46.6,
+    "vas_scores": {
+      "attraction": 46.6
+    },
+    "profile": [
+      "hobby:gaming",
+      "interest:sports"
+    ],
+    "tags": [],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.07,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "a7e47c30793442e9941486870e33c221",
+    "user_id": "demo_user",
+    "vas": 47.3,
+    "vas_scores": {
+      "attraction": 47.3
+    },
+    "profile": [
+      "interest:finance",
+      "age:27-30",
+      "hobby:cooking"
+    ],
+    "tags": [
+      "משעמם",
+      "מרוכז בעצמו",
+      "אכפתי"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.05,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "84a0792474ea41b9b462840d01709400",
+    "user_id": "demo_user",
+    "vas": 34.7,
+    "vas_scores": {
+      "attraction": 34.7
+    },
+    "profile": [
+      "interest:music",
+      "interest:finance",
+      "hobby:gaming"
+    ],
+    "tags": [
+      "אנרגטי",
+      "מצחיק",
+      "משעמם"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.31,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "e530d71106c54bf9a7c3c17bf2212817",
+    "user_id": "demo_user",
+    "vas": 25.9,
+    "vas_scores": {
+      "attraction": 25.9
+    },
+    "profile": [
+      "hobby:gaming",
+      "interest:finance",
+      "age:23-26"
+    ],
+    "tags": [
+      "משעמם",
+      "מרוכז בעצמו"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.48,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "c65df22384b8486d9daaa08739349251",
+    "user_id": "demo_user",
+    "vas": 62.8,
+    "vas_scores": {
+      "attraction": 62.8
+    },
+    "profile": [
+      "age:23-26",
+      "hobby:cooking"
+    ],
+    "tags": [
+      "חמים",
+      "אכפתי"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.26,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "6cf6832aaeff461b9ba2d5a9e073e0ce",
+    "user_id": "demo_user",
+    "vas": 83.5,
+    "vas_scores": {
+      "attraction": 83.5
+    },
+    "profile": [
+      "hobby:cooking",
+      "age:27-30",
+      "interest:travel"
+    ],
+    "tags": [
+      "זורם בשיחה",
+      "תוסס"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.67,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "7307a3857e194a059c2865fe317cb573",
+    "user_id": "demo_user",
+    "vas": 73.9,
+    "vas_scores": {
+      "attraction": 73.9
+    },
+    "profile": [
+      "age:27-30",
+      "interest:travel"
+    ],
+    "tags": [
+      "תוסס"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.48,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "e9f89459d7314410a52c2f9d4ddbce30",
+    "user_id": "demo_user",
+    "vas": 25.5,
+    "vas_scores": {
+      "attraction": 25.5
+    },
+    "profile": [
+      "interest:finance",
+      "age:23-26"
+    ],
+    "tags": [
+      "משעמם",
+      "מרוכז בעצמו"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.49,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "a359d80a0f8c40a99313f140ca3f6215",
+    "user_id": "demo_user",
+    "vas": 63.5,
+    "vas_scores": {
+      "attraction": 63.5
+    },
+    "profile": [
+      "interest:music",
+      "hobby:cooking",
+      "age:23-26"
+    ],
+    "tags": [
+      "מצחיק",
+      "חמים",
+      "אכפתי"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.27,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "77ee6eaed4624ec497300261aee9385b",
+    "user_id": "demo_user",
+    "vas": 65.5,
+    "vas_scores": {
+      "attraction": 65.5
+    },
+    "profile": [
+      "hobby:cooking",
+      "interest:finance",
+      "interest:travel"
+    ],
+    "tags": [
+      "חמים",
+      "מצחיק",
+      "זורם בשיחה",
+      "תוסס"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.31,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "ef06b43294c540b2871f192c25bd55d2",
+    "user_id": "demo_user",
+    "vas": 72.0,
+    "vas_scores": {
+      "attraction": 72.0
+    },
+    "profile": [
+      "hobby:cooking",
+      "age:27-30"
+    ],
+    "tags": [
+      "אכפתי"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.44,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "ade0aa35480b4faba7fb13ae7e15ff75",
+    "user_id": "demo_user",
+    "vas": 40.4,
+    "vas_scores": {
+      "attraction": 40.4
+    },
+    "profile": [
+      "interest:sports",
+      "hobby:gaming"
+    ],
+    "tags": [],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.19,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "1b23f3dd98034385ac24d7b17a91cdaf",
+    "user_id": "demo_user",
+    "vas": 84.2,
+    "vas_scores": {
+      "attraction": 84.2
+    },
+    "profile": [
+      "age:27-30",
+      "hobby:cooking",
+      "interest:sports"
+    ],
+    "tags": [
+      "חמים",
+      "אכפתי"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.68,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.352249+00:00"
+  },
+  {
+    "id": "ba454d7a5f7d467198363459c6552799",
+    "user_id": "demo_user",
+    "vas": 85.6,
+    "vas_scores": {
+      "attraction": 85.6
+    },
+    "profile": [
+      "interest:travel",
+      "hobby:cooking",
+      "age:23-26"
+    ],
+    "tags": [
+      "מצחיק",
+      "זורם בשיחה",
+      "תוסס"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.71,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.353265+00:00"
+  },
+  {
+    "id": "89468570363745849c6de275de5764d2",
+    "user_id": "demo_user",
+    "vas": 69.9,
+    "vas_scores": {
+      "attraction": 69.9
+    },
+    "profile": [
+      "interest:sports",
+      "interest:music"
+    ],
+    "tags": [
+      "אנרגטי",
+      "מצחיק"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.4,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.353265+00:00"
+  },
+  {
+    "id": "6cf3c463f3a7418bb47788567b083eff",
+    "user_id": "demo_user",
+    "vas": 37.7,
+    "vas_scores": {
+      "attraction": 37.7
+    },
+    "profile": [
+      "age:27-30",
+      "interest:finance"
+    ],
+    "tags": [
+      "משעמם",
+      "מרוכז בעצמו"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.25,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.353265+00:00"
+  },
+  {
+    "id": "0feb652d144c46578e7f3166a4fd22b8",
+    "user_id": "demo_user",
+    "vas": 36.6,
+    "vas_scores": {
+      "attraction": 36.6
+    },
+    "profile": [
+      "hobby:gaming",
+      "interest:sports",
+      "age:23-26"
+    ],
+    "tags": [],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.27,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.353265+00:00"
+  },
+  {
+    "id": "31c2687a79664804ac5307247e95a902",
+    "user_id": "demo_user",
+    "vas": 74.2,
+    "vas_scores": {
+      "attraction": 74.2
+    },
+    "profile": [
+      "interest:travel",
+      "hobby:gaming",
+      "age:23-26"
+    ],
+    "tags": [
+      "מצחיק",
+      "זורם בשיחה"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": 0.48,
+    "second_date": true,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.353265+00:00"
+  },
+  {
+    "id": "d977508f08eb425abf7908f1a1e9487d",
+    "user_id": "demo_user",
+    "vas": 34.7,
+    "vas_scores": {
+      "attraction": 34.7
+    },
+    "profile": [
+      "interest:sports",
+      "interest:finance"
+    ],
+    "tags": [
+      "משעמם",
+      "מרוכז בעצמו"
+    ],
+    "topic_tags": [],
+    "vibe_tags": [],
+    "sentiment": -0.31,
+    "second_date": false,
+    "raw_text": "(synthetic)",
+    "created_at": "2026-06-11T09:41:05.353265+00:00"
+  }
+]

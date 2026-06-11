@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A-MORE — Insights</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #f4f7fb;
+           color: #1f3a5f; }
+    header { background: #1f3a5f; color: #fff; padding: 16px 24px; }
+    header h1 { margin: 0; font-size: 20px; }
+    main { max-width: 1040px; margin: 0 auto; padding: 20px;
+           display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .card { background: #fff; border-radius: 12px; padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .card h2 { font-size: 15px; margin: 0 0 10px; color: #2e6fb7; }
+    .full { grid-column: 1 / -1; }
+    #insights li { margin-bottom: 6px; }
+    .empty { color: #999; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header><h1>A-MORE — Personal Insights</h1></header>
+  <main>
+    <div class="card full">
+      <h2>תובנות</h2>
+      <ul id="insights"></ul>
+    </div>
+    <div class="card"><h2>מפת חום קורלציות</h2><canvas id="heatmap"></canvas></div>
+    <div class="card"><h2>משפך דייטים</h2><canvas id="funnel"></canvas></div>
+    <div class="card"><h2>חיזוי מול בפועל</h2><canvas id="scatter"></canvas></div>
+    <div class="card"><h2>ציון VAS לפי תגית</h2><canvas id="boxplots"></canvas></div>
+  </main>
+
+  <script src="src/api.js"></script>
+  <script src="src/heatmap.js"></script>
+  <script src="src/funnel.js"></script>
+  <script src="src/scatter.js"></script>
+  <script src="src/boxplots.js"></script>
+  <script>
+    (async () => {
+      const data = await fetchInsights();
+      const ul = document.getElementById("insights");
+      ul.innerHTML = (data.insights || []).map((t) => `<li>${t}</li>`).join("");
+      renderHeatmap(data.heatmap);
+      renderFunnel(data.funnel);
+      renderScatter(data.scatter);
+      renderBoxplots(data.boxplots);
+    })();
+  </script>
+</body>
+</html>
