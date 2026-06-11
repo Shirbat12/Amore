@@ -19,7 +19,7 @@
 
   /* type */
   --serif: "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
-  --sans: "Assistant", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /* shape + depth */
   --r: 18px;
@@ -79,8 +79,8 @@ body {
   box-shadow: var(--shadow-sm);
 }
 .card-title {
-  font-family: var(--serif);
-  font-weight: 500;
+  font-family: var(--sans);
+  font-weight: 600;
   font-size: 17px;
   color: var(--ink);
   margin: 0 0 14px;
@@ -209,6 +209,12 @@ textarea:focus, input[type="text"]:focus {
   margin-inline-end: 8px;
 }
 @keyframes amore-spin { to { transform: rotate(360deg); } }
+
+/* ---- reusable entrance animation (cards, steps) ------------------------- */
+@keyframes amore-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
 
 /* ---- empty-state note ---------------------------------------------------- */
 .empty { color: var(--mauve); font-size: 13px; }

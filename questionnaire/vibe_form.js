@@ -1,5 +1,7 @@
-// Vibe questionnaire client logic (section 4.2).
-// Collects sliders + tag clouds + intent + free text and POSTs to /feedback.
+// Vibe questionnaire — multi-step wizard (section 4.2).
+// One question per screen with a progress bar, smooth step transitions, and a
+// final thank-you screen. Collects sliders + tag clouds + intent + free text and
+// POSTs to /feedback on submit.
 
 const params = new URLSearchParams(location.search);
 const API_BASE = params.get("api") || "http://localhost:8000";
@@ -21,7 +23,43 @@ const SLIDERS = ["interest_flow", "attraction", "reality_match", "comfort"];
 const selected = { topic: new Set(), vibe: new Set() };
 let intent = null;
 
-// Live numeric readout: show each slider's current value and keep it in sync.
+// ---- step engine ----------------------------------------------------------
+const steps = [...document.querySelectorAll(".step")];
+const progress = document.getElementById("progress");
+let current = 0;
+
+function show(index) {
+  current = Math.max(0, Math.min(steps.length - 1, index));
+  steps.forEach((s, i) => s.classList.toggle("is-active", i === current));
+  // Fill the bar proportionally; welcome = 0%, last step = 100%.
+  progress.style.width = `${Math.round((current / (steps.length - 1)) * 100)}%`;
+  window.scrollTo({ top: 0 });
+}
+
+function next() { if (current < steps.length - 1) show(current + 1); }
+function back() { if (current > 0) show(current - 1); }
+
+// Wire every navigation button by its data-action.
+document.querySelectorAll("[data-action]").forEach((btn) => {
+  const action = btn.dataset.action;
+  btn.addEventListener("click", () => {
+    if (action === "start" || action === "next") next();
+    else if (action === "back") back();
+    else if (action === "submit") submit();
+  });
+});
+
+// Enter advances to the next step — except inside the free-text box, where
+// Enter should add a newline.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  if (document.activeElement && document.activeElement.tagName === "TEXTAREA") return;
+  const active = steps[current];
+  const primary = active.querySelector('[data-action="next"], [data-action="start"], [data-action="submit"]');
+  if (primary) { e.preventDefault(); primary.click(); }
+});
+
+// ---- live slider readouts -------------------------------------------------
 SLIDERS.forEach((id) => {
   const el = document.getElementById(id);
   const out = document.getElementById(`${id}_val`);
@@ -30,7 +68,7 @@ SLIDERS.forEach((id) => {
   sync();
 });
 
-// Build a tag cloud where up to 3 pills can be selected, with a live counter.
+// ---- tag clouds (up to 3, with a live counter) ----------------------------
 function buildTags(containerId, counterId, bank, bucket) {
   const root = document.getElementById(containerId);
   const counter = document.getElementById(counterId);
@@ -40,13 +78,8 @@ function buildTags(containerId, counterId, bank, bucket) {
     b.className = "pill";
     b.textContent = tag;
     b.addEventListener("click", () => {
-      if (bucket.has(tag)) {
-        bucket.delete(tag);
-        b.classList.remove("on");
-      } else if (bucket.size < 3) {
-        bucket.add(tag);
-        b.classList.add("on");
-      }
+      if (bucket.has(tag)) { bucket.delete(tag); b.classList.remove("on"); }
+      else if (bucket.size < 3) { bucket.add(tag); b.classList.add("on"); }
       updateCounter();
     });
     root.appendChild(b);
@@ -57,12 +90,13 @@ function buildTags(containerId, counterId, bank, bucket) {
 buildTags("topic_tags", "topic_counter", TOPIC_BANK, selected.topic);
 buildTags("vibe_tags", "vibe_counter", VIBE_BANK, selected.vibe);
 
-// Second-date intent: one choice highlighted at a time.
-document.querySelectorAll(".intent-row button").forEach((b) => {
+// ---- second-date intent (single choice, auto-advances) --------------------
+document.querySelectorAll(".intent-col button").forEach((b) => {
   b.addEventListener("click", () => {
     intent = b.dataset.intent;
-    document.querySelectorAll(".intent-row button").forEach((x) => x.classList.remove("on"));
+    document.querySelectorAll(".intent-col button").forEach((x) => x.classList.remove("on"));
     b.classList.add("on");
+    setTimeout(next, 260); // brief beat so the selection registers visually
   });
 });
 
@@ -72,10 +106,9 @@ function intentToBool(value) {
   return null; // "maybe" or unanswered
 }
 
-const status = document.getElementById("status");
-const submitBtn = document.getElementById("submit");
-
-submitBtn.addEventListener("click", async () => {
+// ---- submit ---------------------------------------------------------------
+async function submit() {
+  const submitBtn = document.getElementById("submit");
   const slider = (id) => Number(document.getElementById(id).value);
   const payload = {
     user_id: USER_ID,
@@ -93,8 +126,7 @@ submitBtn.addEventListener("click", async () => {
   };
 
   submitBtn.disabled = true;
-  status.className = "";
-  status.textContent = "שולחת…";
+  submitBtn.textContent = "שולחת…";
   try {
     const res = await fetch(`${API_BASE}/feedback`, {
       method: "POST",
@@ -103,11 +135,16 @@ submitBtn.addEventListener("click", async () => {
     });
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
-    status.className = "ok";
-    status.textContent = `תודה! נשמר. תגיות שזוהו: ${data.extracted_tags.join(", ") || "—"}`;
+    const tags = (data.extracted_tags || []).join(", ");
+    document.getElementById("done_msg").innerHTML = tags
+      ? `הדייט נשמר. תגיות שזיהינו: <span class="tags-found">${tags}</span>`
+      : "הדייט נשמר. נדייק לך את ההמלצות.";
+    next(); // move to the thank-you screen
   } catch (e) {
-    status.className = "err";
-    status.textContent = "שגיאה בשליחה. ודאי שהשרת רץ.";
     submitBtn.disabled = false;
+    submitBtn.textContent = "שליחה";
+    alert("שגיאה בשליחה. ודאי שהשרת רץ.");
   }
-});
+}
+
+show(0);

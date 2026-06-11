@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;700&display=swap" rel="stylesheet" />
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4/build/index.umd.min.js"></script>
@@ -19,6 +19,12 @@
     .full { grid-column: 1 / -1; }
     #banner { grid-column: 1 / -1; }
     canvas { max-height: 260px; }
+    main section.card { animation: amore-rise 0.5s ease both; }
+    main section.card:nth-of-type(1) { animation-delay: 0.02s; }
+    main section.card:nth-of-type(2) { animation-delay: 0.08s; }
+    main section.card:nth-of-type(3) { animation-delay: 0.14s; }
+    main section.card:nth-of-type(4) { animation-delay: 0.20s; }
+    main section.card:nth-of-type(5) { animation-delay: 0.26s; }
     @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -55,7 +61,7 @@
     const subtitle = document.getElementById("subtitle");
 
     // Make the chart text match the brand voice (sans body, mauve labels).
-    Chart.defaults.font.family = "'Assistant', system-ui, sans-serif";
+    Chart.defaults.font.family = "'Rubik', system-ui, sans-serif";
     Chart.defaults.color = "#9a7c86";
 
     // Show what we're pointing at up front — most "empty dashboard" problems are
