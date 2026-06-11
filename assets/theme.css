@@ -115,23 +115,28 @@ body {
 }
 .btn-ghost:hover { background: var(--blush); }
 
-/* ---- insight list (love-letter style) ------------------------------------ */
-.insights { list-style: none; margin: 0; padding: 0; }
-.insights li {
-  position: relative;
-  padding-inline-start: 24px;
-  margin-bottom: 10px;
-  line-height: 1.6;
+/* ---- insight chips (color-coded by direction) ---------------------------- */
+.insights-stat { font-size: 13.5px; color: var(--mauve); margin: 0 0 14px; }
+.insights { display: flex; flex-direction: column; gap: 10px; }
+.insight {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--gold-line);
   font-size: 15px;
+  line-height: 1.5;
 }
-.insights li::before {
-  content: "\2665";                 /* heart */
-  position: absolute;
-  inset-inline-start: 0;
-  top: 1px;
-  color: var(--rose);
-  font-size: 13px;
+.insight--up { background: #fbeaec; }      /* soft rose tint = a pattern that works for you */
+.insight--down { background: #eef1f6; }    /* soft slate tint = a weaker pattern */
+.insight-mark { font-size: 18px; line-height: 1; }
+.insight-text { flex: 1; color: var(--ink); }
+.insight-badge {
+  font-size: 11px; font-weight: 700; color: #fff;
+  background: var(--rose); border-radius: var(--r-pill); padding: 3px 10px;
 }
+.insight--down .insight-badge { background: var(--slate); }
 
 /* ---- selectable tag pills ------------------------------------------------ */
 .pill {

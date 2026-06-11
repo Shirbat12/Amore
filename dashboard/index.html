@@ -40,7 +40,8 @@
 
     <section class="card full">
       <h2 class="card-title">תובנות</h2>
-      <ul class="insights" id="insights"></ul>
+      <p class="insights-stat" id="insights_stat"></p>
+      <div class="insights" id="insights"></div>
     </section>
     <section class="card"><h2 class="card-title">מפת חום קורלציות</h2><canvas id="heatmap"></canvas></section>
     <section class="card"><h2 class="card-title">משפך דייטים</h2><canvas id="funnel"></canvas></section>
@@ -97,13 +98,31 @@
       document.getElementById("retry").addEventListener("click", load);
     }
 
+    function renderInsights(items, nDates) {
+      const stat = document.getElementById("insights_stat");
+      const box = document.getElementById("insights");
+      if (!items.length) {
+        stat.textContent = "";
+        box.innerHTML = `<p class="empty">עדיין אוספים נתונים — אחרי עוד כמה דייטים יתחילו לצוץ דפוסים 💫</p>`;
+        return;
+      }
+      stat.textContent = `💖 גילינו ${items.length} דפוסים מתוך ${nDates} דייטים`;
+      box.innerHTML = items.map((it) => {
+        const up = it.direction === "up";
+        const mark = up ? "💖" : "💔";
+        const badge = it.strength === "strong" ? `<span class="insight-badge">בולט</span>` : "";
+        return `<div class="insight insight--${up ? "up" : "down"}">`
+          + `<span class="insight-mark">${mark}</span>`
+          + `<span class="insight-text">${escapeHtml(it.text)}</span>${badge}</div>`;
+      }).join("");
+    }
+
     async function load() {
       showLoading();
       try {
         const data = await fetchInsights();
         hideBanner();
-        const ul = document.getElementById("insights");
-        ul.innerHTML = (data.insights || []).map((t) => `<li>${escapeHtml(t)}</li>`).join("");
+        renderInsights(data.insights || [], data.n_dates);
         renderHeatmap(data.heatmap);
         renderFunnel(data.funnel);
         renderScatter(data.scatter);
