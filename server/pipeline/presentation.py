@@ -63,22 +63,36 @@ def _boxplots_by_tag(history: List[DateRecord]) -> Dict[str, List[float]]:
     return {tag: vals for tag, vals in by_tag.items() if len(vals) >= 2}
 
 
-def _insights(corr: Dict[str, tuple]) -> List[str]:
-    """Short natural-language takeaways from the strongest significant links."""
-    out = []
+def _insights(corr: Dict[str, tuple]) -> List[Dict]:
+    """Plain-language, rank-ordered takeaways from the strongest significant links.
+
+    Returns structured items the dashboard styles by direction and strength,
+    instead of raw correlation text. An empty list means "not enough signal yet",
+    and the client shows its own friendly empty state.
+    """
+    out: List[Dict] = []
     ranked = sorted(corr.items(), key=lambda kv: abs(kv[1][0]), reverse=True)
     for name, (rho, q) in ranked:
         if q > config.SIGNIFICANT_Q:
             continue
-        label = name.split(":", 1)[-1]
+        if name == "sentiment":          # circular (derived from the date) -> skip
+            continue
+        # Show just the human value, dropping the "profile:"/"interest:" prefixes.
+        label = name.split(":")[-1]
         if rho > 0:
-            out.append(f"דייטים עם '{label}' נוטים לקבל ציון גבוה אצלך (rho={rho:.2f}).")
+            text = f"'{label}' עושה לך טוב — הדייטים האלה נוטים להצליח"
+            direction = "up"
         else:
-            out.append(f"דייטים עם '{label}' נוטים לקבל ציון נמוך אצלך (rho={rho:.2f}).")
+            text = f"'{label}' פחות מתאים לך — הדייטים האלה נוטים לזרום פחות"
+            direction = "down"
+        out.append({
+            "text": text,
+            "direction": direction,
+            "strength": "strong" if abs(rho) >= 0.5 else "medium",
+            "feature": label,
+        })
         if len(out) >= 5:
             break
-    if not out:
-        out.append("עוד לא נצברו מספיק דייטים לחשיפת דפוסים מובהקים.")
     return out
 
 

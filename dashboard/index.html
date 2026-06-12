@@ -25,6 +25,7 @@
     main section.card:nth-of-type(3) { animation-delay: 0.14s; }
     main section.card:nth-of-type(4) { animation-delay: 0.20s; }
     main section.card:nth-of-type(5) { animation-delay: 0.26s; }
+    main section.card:nth-of-type(6) { animation-delay: 0.32s; }
     @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -40,7 +41,12 @@
 
     <section class="card full">
       <h2 class="card-title">תובנות</h2>
-      <ul class="insights" id="insights"></ul>
+      <p class="insights-stat" id="insights_stat"></p>
+      <div class="insights" id="insights"></div>
+    </section>
+    <section class="card full" id="alignment_card">
+      <h2 class="card-title">החלטות מיושרות</h2>
+      <div id="alignment_body"></div>
     </section>
     <section class="card"><h2 class="card-title">מפת חום קורלציות</h2><canvas id="heatmap"></canvas></section>
     <section class="card"><h2 class="card-title">משפך דייטים</h2><canvas id="funnel"></canvas></section>
@@ -97,13 +103,65 @@
       document.getElementById("retry").addEventListener("click", load);
     }
 
+    function renderInsights(items, nDates) {
+      const stat = document.getElementById("insights_stat");
+      const box = document.getElementById("insights");
+      if (!items.length) {
+        stat.textContent = "";
+        box.innerHTML = `<p class="empty">עדיין אוספים נתונים — אחרי עוד כמה דייטים יתחילו לצוץ דפוסים 💫</p>`;
+        return;
+      }
+      stat.textContent = `💖 גילינו ${items.length} דפוסים מתוך ${nDates} דייטים`;
+      box.innerHTML = items.map((it) => {
+        const up = it.direction === "up";
+        const mark = up ? "💖" : "💔";
+        const badge = it.strength === "strong" ? `<span class="insight-badge">בולט</span>` : "";
+        return `<div class="insight insight--${up ? "up" : "down"}">`
+          + `<span class="insight-mark">${mark}</span>`
+          + `<span class="insight-text">${escapeHtml(it.text)}</span>${badge}</div>`;
+      }).join("");
+    }
+
+    // Decision-Alignment KPI (section 4.1): how often the user liked profiles
+    // carrying a feature their own history proves works for them. A circular
+    // gauge for the rate, plain-language framing, and the endorsed features.
+    function renderAlignment(da) {
+      const card = document.getElementById("alignment_card");
+      const body = document.getElementById("alignment_body");
+      if (!da) { card.style.display = "none"; return; }   // older backend: hide gracefully
+      card.style.display = "";
+      if (da.rate === null || da.rate === undefined) {
+        body.innerHTML = `<p class="empty">עדיין אין מספיק לייקים כדי לחשב יישור — תני לתוסף לאסוף עוד החלקות 💫</p>`;
+        return;
+      }
+      const pct = Math.round(da.rate);
+      const r = 46, C = 2 * Math.PI * r, off = C * (1 - pct / 100);
+      const feats = (da.positive_features || []).slice(0, 8)
+        .map((f) => `<span class="pill">${escapeHtml(f.split(":").pop())}</span>`).join("");
+      body.innerHTML = `
+        <div class="align-row">
+          <div class="gauge">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="${r}" fill="none" style="stroke: var(--gold-line)" stroke-width="10"></circle>
+              <circle cx="60" cy="60" r="${r}" fill="none" style="stroke: var(--rose)" stroke-width="10"
+                      stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"></circle>
+            </svg>
+            <div class="gauge-num">${pct}%</div>
+          </div>
+          <div class="align-text">
+            <p>מתוך <b>${da.n_selected}</b> פרופילים שאהבת, <b>${pct}%</b> תאמו לדפוסים שעובדים לך 💘</p>
+            ${feats ? `<div class="align-label">המאפיינים שמתאימים לך:</div><div class="align-feats">${feats}</div>` : ""}
+          </div>
+        </div>`;
+    }
+
     async function load() {
       showLoading();
       try {
         const data = await fetchInsights();
         hideBanner();
-        const ul = document.getElementById("insights");
-        ul.innerHTML = (data.insights || []).map((t) => `<li>${escapeHtml(t)}</li>`).join("");
+        renderInsights(data.insights || [], data.n_dates);
+        renderAlignment(data.decision_alignment);
         renderHeatmap(data.heatmap);
         renderFunnel(data.funnel);
         renderScatter(data.scatter);
