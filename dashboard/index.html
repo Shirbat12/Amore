@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>A-MORE — תובנות</title>
+  <title>A-MORE</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -45,13 +45,45 @@
       <div class="insights" id="insights"></div>
     </section>
     <section class="card full" id="alignment_card">
-      <h2 class="card-title">החלטות מיושרות</h2>
+      <h2 class="card-title">תאמו לדפוסים המוצלחים שלך</h2>
       <div id="alignment_body"></div>
     </section>
-    <section class="card"><h2 class="card-title">מפת חום קורלציות</h2><canvas id="heatmap"></canvas></section>
-    <section class="card"><h2 class="card-title">משפך דייטים</h2><canvas id="funnel"></canvas></section>
-    <section class="card"><h2 class="card-title">חיזוי מול בפועל</h2><canvas id="scatter"></canvas></section>
-    <section class="card"><h2 class="card-title">ציון VAS לפי תגית</h2><canvas id="boxplots"></canvas></section>
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">מפת חום קורלציות</h2>
+        <button class="help-btn" data-help="heatmap" aria-expanded="false" aria-label="איך לקרוא?">?</button>
+      </div>
+      <p class="card-sub">כל פס הוא מאפיין בפרופיל, וכמה הוא קשור לדייט מוצלח.</p>
+      <div class="help-panel" id="help_heatmap" hidden>כל פס מייצג מאפיין בפרופיל, וככל שהוא ארוך יותר — הקשר שלו לציון הדייט חזק יותר. פס ורוד ימינה = מאפיין שמיטיב איתך; פס אפור שמאלה = מאפיין שפחות עובד לך. לדוגמה: פס ורוד ארוך ל-'travel' אומר שדייטים עם תחום העניין הזה נוטים להצליח אצלך.</div>
+      <canvas id="heatmap"></canvas>
+    </section>
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">משפך דייטים</h2>
+        <button class="help-btn" data-help="funnel" aria-expanded="false" aria-label="איך לקרוא?">?</button>
+      </div>
+      <p class="card-sub">כמה דייטים ראשונים הובילו לרצון בדייט שני.</p>
+      <div class="help-panel" id="help_funnel" hidden>העמודה הראשונה היא כל הדייטים הראשונים שלך, והשנייה היא אלה שבהם רצית דייט שני. ההפרש ביניהן מראה את אחוז ההמשך. לדוגמה: אם מתוך 30 דייטים ראשונים ב-12 רצית להמשיך, זה אחוז המשך של כ-40%.</div>
+      <canvas id="funnel"></canvas>
+    </section>
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">ציפיות מול מציאות</h2>
+        <button class="help-btn" data-help="scatter" aria-expanded="false" aria-label="איך לקרוא?">?</button>
+      </div>
+      <p class="card-sub">כמה המודל דייק בניבוי איך תרגישי אחרי הדייט.</p>
+      <div class="help-panel" id="help_scatter" hidden>כל נקודה היא דייט: הציר האופקי הוא מה שהמודל ניבא, והאנכי הוא איך באמת הרגשת. ככל שהנקודות קרובות יותר לקו אלכסוני דמיוני, המודל מדייק יותר. לדוגמה: נקודה ב-(80, 78) אומרת שהמודל ניבא 80 והרגשת 78 — דיוק כמעט מושלם.</div>
+      <canvas id="scatter"></canvas>
+    </section>
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">ציון VAS לפי תגית</h2>
+        <button class="help-btn" data-help="boxplots" aria-expanded="false" aria-label="איך לקרוא?">?</button>
+      </div>
+      <p class="card-sub">איך הציון שלך מתפלג עבור כל סוג אווירה בדייט.</p>
+      <div class="help-panel" id="help_boxplots" hidden>כל תיבה מראה את טווח הציונים שנתת לדייטים עם אווירה מסוימת. הקו באמצע הוא הציון האמצעי (חציון), והקצוות הם הנמוך והגבוה. לדוגמה: תיבה גבוהה ל-'קליל וזורם' אומרת שדייטים כאלה מקבלים ממך ציונים גבוהים בעקביות.</div>
+      <canvas id="boxplots"></canvas>
+    </section>
   </main>
 
   <script src="src/api.js"></script>
@@ -171,6 +203,17 @@
         showError(err);
       }
     }
+
+    // Toggle each chart's "how to read" panel from its ? button.
+    document.querySelectorAll(".help-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const panel = document.getElementById("help_" + btn.dataset.help);
+        const opening = panel.hasAttribute("hidden");
+        if (opening) panel.removeAttribute("hidden");
+        else panel.setAttribute("hidden", "");
+        btn.setAttribute("aria-expanded", String(opening));
+      });
+    });
 
     load();
   </script>
