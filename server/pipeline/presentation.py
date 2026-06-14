@@ -1,22 +1,44 @@
 """Module 2.3.4 - presentation layer.
 
-Translates the statistical output into JSON-serializable payloads for the two
-client surfaces: the real-time overlay (one profile) and the dashboard (four
-aggregate visualizations + natural-language insights). Grounded in the idea that
-visuals reduce decision load (Larkin & Simon, 1987).
+Translates statistical output into JSON-serializable payloads for the two client
+surfaces:
+  - Overlay: real-time score painted on top of one profile.
+  - Dashboard: aggregate visualizations, experiment analysis and insights.
+
+The module intentionally returns plain dictionaries so the backend can send them
+as JSON without additional transformation.
 """
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Optional
+
+import pandas as pd
 
 from server import config
 from server.models import DateRecord
 from server.pipeline.predictor import fit_predictor, learn_correlations, score_profile
 
 
+def _safe_round(value, digits: int = 2):
+    """Round numeric values safely for JSON output."""
+    if value is None or pd.isna(value):
+        return None
+    return round(float(value), digits)
+
+
+def _token_label(token: str) -> str:
+    """Normalize profile tokens such as 'interest:טיולים' into 'טיולים'."""
+    return str(token).split(":")[-1].strip()
+
+
+# ============================================================
+# Overlay / Chrome extension
+# ============================================================
+
+
 def build_overlay(history: List[DateRecord], profile_tokens: List[str]) -> Dict:
-    """Payload the extension paints on top of a profile (fast decision)."""
+    """Payload the extension paints on top of a profile using the predictor."""
     result = score_profile(history, profile_tokens)
     return {
         "score": result["score"],
@@ -25,80 +47,204 @@ def build_overlay(history: List[DateRecord], profile_tokens: List[str]) -> Dict:
     }
 
 
+def build_revealed_preference_overlay(
+    profile_tokens: List[str],
+    experiment_analysis: Dict,
+) -> Dict:
+    """
+    Explainable add-on score based on revealed-preference dashboard patterns.
+
+    This does not call Gemini. It only consumes an existing experiment_analysis
+    payload and compares profile tokens to positive/negative learned patterns.
+    """
+    revealed = experiment_analysis.get("revealed_preferences", {})
+    positive_patterns = revealed.get("positive_patterns", [])
+    negative_patterns = revealed.get("negative_patterns", [])
+
+    profile_labels = {_token_label(token) for token in profile_tokens}
+
+    score = 50.0
+    reasons: List[str] = []
+    warnings: List[str] = []
+    matched_count = 0
+
+    for pattern in positive_patterns:
+        feature = str(pattern.get("feature", "")).strip()
+        if feature not in profile_labels:
+            continue
+
+        matched_count += 1
+        strength = float(pattern.get("preference_strength") or 0)
+        confidence = pattern.get("confidence", {}).get("confidence_level", "low")
+        weight = {"low": 4, "medium": 7, "high": 10}.get(confidence, 4)
+        score += weight + max(strength, 0) * 10
+        reasons.append(
+            f"'{feature}' הופיע בדפוסים חיוביים קודמים "
+            f"({pattern.get('feature_type_label', 'מאפיין')})."
+        )
+
+    for pattern in negative_patterns:
+        feature = str(pattern.get("feature", "")).strip()
+        if feature not in profile_labels:
+            continue
+
+        matched_count += 1
+        strength = float(pattern.get("preference_strength") or 0)
+        confidence = pattern.get("confidence", {}).get("confidence_level", "low")
+        weight = {"low": 4, "medium": 7, "high": 10}.get(confidence, 4)
+        score -= weight + abs(min(strength, 0)) * 10
+        warnings.append(
+            f"'{feature}' הופיע בדפוסים שפחות נטו להצליח בעבר "
+            f"({pattern.get('feature_type_label', 'מאפיין')})."
+        )
+
+    score = max(0, min(100, round(score)))
+
+    if matched_count >= 4:
+        confidence = "high"
+    elif matched_count >= 2:
+        confidence = "medium"
+    else:
+        confidence = "low"
+        warnings.append("אין עדיין מספיק דפוסים אישיים עבור כל מאפייני הפרופיל.")
+
+    return {
+        "score": score,
+        "confidence": confidence,
+        "reasons": reasons[:5],
+        "warnings": warnings[:5],
+        "matched_patterns": matched_count,
+    }
+
+
+# ============================================================
+# Dashboard helpers
+# ============================================================
+
+
 def _heatmap(corr: Dict[str, tuple]) -> List[Dict]:
-    """Correlation heatmap data: rho (color) and q-value (opacity) per feature."""
-    return [
-        {"feature": name, "rho": round(rho, 3), "q": round(q, 3)}
-        for name, (rho, q) in sorted(corr.items(), key=lambda kv: kv[1][0])
-    ]
+    """Correlation heatmap: rho and q-value per feature."""
+    rows = []
+    for name, values in corr.items():
+        try:
+            rho, q_value = values
+        except (TypeError, ValueError):
+            continue
+
+        rows.append({
+            "feature": name,
+            "rho": _safe_round(rho, 3),
+            "q": _safe_round(q_value, 3),
+        })
+
+    return sorted(rows, key=lambda row: row["rho"] if row["rho"] is not None else 0)
 
 
 def _funnel(history: List[DateRecord]) -> Dict[str, int]:
     """First dates -> reported second-date intent."""
-    first = len(history)
-    seconds = sum(1 for d in history if d.second_date is True)
-    maybes = sum(1 for d in history if d.second_date is None)
-    return {"first_dates": first, "second_dates": seconds, "maybe": maybes}
+    first_dates = len(history)
+    second_dates = sum(1 for date_record in history if date_record.second_date is True)
+    maybes = sum(1 for date_record in history if date_record.second_date is None)
+    return {
+        "first_dates": first_dates,
+        "second_dates": second_dates,
+        "maybe": maybes,
+    }
 
 
 def _scatter_predicted_vs_actual(history: List[DateRecord]) -> List[Dict]:
-    """Leave-one-out predicted VAS vs the actually reported VAS."""
-    points = []
+    """Leave-one-out predicted VAS vs. actually reported VAS."""
     if len(history) <= config.MIN_DATES:
-        return points
-    for i, held in enumerate(history):
-        rest = history[:i] + history[i + 1:]
-        predictor = fit_predictor(rest)
-        pred = max(0.0, min(100.0, predictor.predict_one(held.profile)))
-        points.append({"predicted": round(pred, 1), "actual": round(held.vas, 1)})
+        return []
+
+    points = []
+    for index, held_out in enumerate(history):
+        rest = history[:index] + history[index + 1:]
+        try:
+            predictor = fit_predictor(rest)
+            predicted = predictor.predict_one(held_out.profile)
+        except Exception:
+            continue
+
+        predicted = max(0.0, min(100.0, predicted))
+        points.append({
+            "predicted": _safe_round(predicted, 1),
+            "actual": _safe_round(held_out.vas, 1),
+        })
+
     return points
 
 
 def _boxplots_by_tag(history: List[DateRecord]) -> Dict[str, List[float]]:
     """Distribution of VAS scores grouped by extracted character tag."""
     by_tag: Dict[str, List[float]] = defaultdict(list)
-    for d in history:
-        for t in d.tags:
-            by_tag[t].append(d.vas)
-    return {tag: vals for tag, vals in by_tag.items() if len(vals) >= 2}
+
+    for date_record in history:
+        for tag in date_record.tags:
+            by_tag[tag].append(float(date_record.vas))
+
+    return {
+        tag: values
+        for tag, values in by_tag.items()
+        if len(values) >= 2
+    }
 
 
-def _insights(corr: Dict[str, tuple]) -> List[Dict]:
-    """Plain-language, rank-ordered takeaways from the strongest significant links.
-
-    Returns structured items the dashboard styles by direction and strength,
-    instead of raw correlation text. An empty list means "not enough signal yet",
-    and the client shows its own friendly empty state.
+def _insights(corr: Dict[str, tuple], max_items: int = 5) -> List[Dict]:
     """
+    Plain-language, rank-ordered takeaways from the strongest correlations.
+
+    Significant links are marked as significant=True. With small datasets, q may
+    be high, so we still return useful low-confidence candidates instead of an
+    empty list.
+    """
+    ranked = sorted(corr.items(), key=lambda item: abs(item[1][0]), reverse=True)
     out: List[Dict] = []
-    ranked = sorted(corr.items(), key=lambda kv: abs(kv[1][0]), reverse=True)
-    for name, (rho, q) in ranked:
-        if q > config.SIGNIFICANT_Q:
+
+    for name, (rho, q_value) in ranked:
+        if name == "sentiment":
             continue
-        if name == "sentiment":          # circular (derived from the date) -> skip
-            continue
-        # Show just the human value, dropping the "profile:"/"interest:" prefixes.
-        label = name.split(":")[-1]
+
+        label = _token_label(name)
+        direction = "up" if rho > 0 else "down"
+        significant = q_value <= config.SIGNIFICANT_Q
+        strength = "strong" if abs(rho) >= 0.5 else "medium" if abs(rho) >= 0.3 else "weak"
+
         if rho > 0:
-            text = f"'{label}' עושה לך טוב — הדייטים האלה נוטים להצליח"
-            direction = "up"
+            text = f"'{label}' נוטה להופיע בדייטים עם ציון גבוה יותר"
         else:
-            text = f"'{label}' פחות מתאים לך — הדייטים האלה נוטים לזרום פחות"
-            direction = "down"
+            text = f"'{label}' נוטה להופיע בדייטים עם ציון נמוך יותר"
+
         out.append({
             "text": text,
             "direction": direction,
-            "strength": "strong" if abs(rho) >= 0.5 else "medium",
+            "strength": strength,
             "feature": label,
+            "rho": _safe_round(rho, 3),
+            "q": _safe_round(q_value, 3),
+            "significant": bool(significant),
+            "confidence_note": (
+                "מובהק סטטיסטית"
+                if significant
+                else "כיוון ראשוני בלבד - המדגם קטן"
+            ),
         })
-        if len(out) >= 5:
+
+        if len(out) >= max_items:
             break
+
     return out
 
 
+# ============================================================
+# Public entry points
+# ============================================================
+
+
 def build_dashboard(history: List[DateRecord]) -> Dict:
-    """Full dashboard payload returned by /insights."""
+    """Full standard dashboard payload returned by /insights."""
     corr = learn_correlations(history) if len(history) >= 2 else {}
+
     return {
         "n_dates": len(history),
         "heatmap": _heatmap(corr),
@@ -106,4 +252,61 @@ def build_dashboard(history: List[DateRecord]) -> Dict:
         "scatter": _scatter_predicted_vs_actual(history),
         "boxplots": _boxplots_by_tag(history),
         "insights": _insights(corr),
+    }
+
+
+def build_questionnaire_dashboard(
+    include_standard_dashboard: bool = True,
+    include_experiment_analysis: bool = True,
+) -> Dict:
+    """
+    Dashboard based on real questionnaire data.
+
+    Parameters make development easier:
+    - include_standard_dashboard=False skips the older correlation dashboard.
+    - include_experiment_analysis=False skips the questionnaire analysis.
+    """
+    from server.pipeline.questionnaire_loader import load_questionnaire_history
+    from server.pipeline.experiment_analysis import analyze_questionnaire_experiment
+
+    history, baseline_df, date_df = load_questionnaire_history()
+
+    dashboard: Dict = {"n_dates": len(history)}
+
+    if include_standard_dashboard:
+        dashboard.update(build_dashboard(history))
+
+    if include_experiment_analysis:
+        dashboard["experiment_analysis"] = analyze_questionnaire_experiment(
+            baseline_df=baseline_df,
+            date_df=date_df,
+        )
+
+    return dashboard
+
+
+def build_questionnaire_overlay(profile_tokens: List[str]) -> Dict:
+    """
+    Build an overlay score that combines the predictor and questionnaire patterns.
+
+    Note: this can be expensive if experiment analysis triggers new Gemini calls.
+    With cache enabled in free_text_analysis.py it becomes fast after the first run.
+    """
+    from server.pipeline.questionnaire_loader import load_questionnaire_history
+    from server.pipeline.experiment_analysis import analyze_questionnaire_experiment
+
+    history, baseline_df, date_df = load_questionnaire_history()
+    base_overlay = build_overlay(history, profile_tokens)
+    experiment_analysis = analyze_questionnaire_experiment(baseline_df, date_df)
+    revealed_overlay = build_revealed_preference_overlay(profile_tokens, experiment_analysis)
+
+    combined_score = round(base_overlay["score"] * 0.6 + revealed_overlay["score"] * 0.4)
+
+    return {
+        "score": max(0, min(100, combined_score)),
+        "confidence": revealed_overlay["confidence"],
+        "base_overlay": base_overlay,
+        "revealed_preference_overlay": revealed_overlay,
+        "reasons": base_overlay.get("reasons", []) + revealed_overlay.get("reasons", []),
+        "warnings": revealed_overlay.get("warnings", []),
     }
