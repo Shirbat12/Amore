@@ -363,7 +363,7 @@ def analyze_questionnaire_experiment(
     segment_analysis = analyze_segments(df)
 
     revealed_preferences = build_revealed_preferences_dashboard(df)
-
+    word_cloud = build_word_cloud_from_preferences(revealed_preferences)
     natural_language_insights = build_natural_language_insights(
         baseline_df=baseline_df,
         date_df=df,
@@ -391,4 +391,40 @@ def analyze_questionnaire_experiment(
         "free_text_analysis": free_text_analysis,
         "free_text_closed_alignment": free_text_closed_alignment,
         "natural_language_insights": natural_language_insights,
+        "word_cloud": word_cloud,
+    }
+
+    def build_word_cloud_from_preferences(revealed_preferences: Dict) -> Dict:
+    """
+    Builds a dashboard-ready word cloud from positive revealed preferences.
+    """
+    positive_patterns = revealed_preferences.get("positive_patterns", [])
+
+    items = []
+
+    for pattern in positive_patterns:
+        appearances = int(pattern.get("appearances", 0))
+
+        if appearances < 2:
+            continue
+
+        items.append({
+            "text": pattern.get("feature"),
+            "weight": appearances,
+            "score": pattern.get("preference_strength"),
+            "sentiment": "positive",
+            "source": pattern.get("feature_type"),
+            "confidence": pattern.get("confidence", {}).get("confidence_label"),
+        })
+
+    items = sorted(
+        items,
+        key=lambda item: (item["weight"], item["score"] or 0),
+        reverse=True,
+    )[:12]
+
+    return {
+        "title": "ענן תחומי עניין בולטים",
+        "subtitle": "מילים שחזרו בדייטים החיוביים שלך",
+        "items": items,
     }

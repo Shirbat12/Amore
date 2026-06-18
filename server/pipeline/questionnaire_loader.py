@@ -196,10 +196,18 @@ def dataframe_to_date_records(df: pd.DataFrame) -> List[DateRecord]:
         topic_tags = _split_tags(row.get("conversation_topics"))
         vibe_tags = _split_tags(row.get("date_dynamic_tags"))
 
+        vas_0_10 = _primary_vas(vas_scores)
+
+        vas_scores_0_100 = {
+            key: round(float(value) * 10, 1)
+            for key, value in vas_scores.items()
+            if value is not None
+        }
+
         record = DateRecord(
             user_id=row["user_id"],
-            vas=_primary_vas(vas_scores),
-            vas_scores=vas_scores,
+            vas=round(float(vas_0_10) * 10, 1),
+            vas_scores=vas_scores_0_100,
             profile=profile_tokens,
             tags=vibe_tags,
             topic_tags=topic_tags,
