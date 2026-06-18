@@ -4,10 +4,11 @@
 // POSTs to /feedback on submit.
 
 const params = new URLSearchParams(location.search);
-const API_BASE = params.get("api") || "http://localhost:8000";
-const USER_ID = params.get("user") || "demo_user";
-// The profile scraped at match time is passed through so the saved record links
-// the dry features to this outcome.
+// Base URL + user come from the shared config (assets/config.js).
+const API_BASE = window.AMORE_CONFIG.apiBase;
+const USER_ID = window.AMORE_CONFIG.userId;
+// The profile scraped at match time is passed through (questionnaire-specific)
+// so the saved record links the dry features to this outcome.
 const PROFILE = (params.get("profile") || "").split(",").filter(Boolean);
 
 const TOPIC_BANK = [
