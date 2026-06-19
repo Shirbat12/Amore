@@ -141,22 +141,64 @@
       document.getElementById("retry").addEventListener("click", load);
     }
 
-    function renderInsights(items, nDates) {
+    function revealedPreferenceInsights(data) {
+      const revealed = data.experiment_analysis && data.experiment_analysis.revealed_preferences;
+      if (!revealed) return [];
+
+      const positives = (revealed.positive_patterns || [])
+        .filter((item) => Number(item.appearances || 0) >= 2)
+        .slice(0, 3)
+        .map((item) => ({
+        ...item,
+        direction: "up",
+      }));
+      const negatives = (revealed.negative_patterns || [])
+        .filter((item) => Number(item.appearances || 0) >= 2)
+        .slice(0, 2)
+        .map((item) => ({
+        ...item,
+        direction: "down",
+      }));
+
+      return positives.concat(negatives);
+    }
+
+    function renderInsights(data) {
       const stat = document.getElementById("insights_stat");
       const box = document.getElementById("insights");
+      const nDates = data.n_dates || 0;
+      const revealedItems = revealedPreferenceInsights(data);
+      const useRevealed = revealedItems.length > 0;
+      const items = useRevealed ? revealedItems : (data.insights || []);
       if (!items.length) {
         stat.textContent = "";
         box.innerHTML = `<p class="empty">עדיין אוספים נתונים — אחרי עוד כמה דייטים יתחילו לצוץ דפוסים 💫</p>`;
         return;
       }
       stat.textContent = `💖 גילינו ${items.length} דפוסים מתוך ${nDates} דייטים`;
-      box.innerHTML = items.map((it) => {
+      if (useRevealed) {
+        stat.textContent = `גילינו ${items.length} דפוסים ראשוניים מתוך ${nDates} דייטים`;
+      }
+
+      const smallHistoryNote = useRevealed
+        ? `<p class="empty">התובנות הן דפוסים ראשוניים מתוך ${escapeHtml(nDates)} דייטים.</p>`
+        : "";
+
+      box.innerHTML = smallHistoryNote + items.map((it) => {
         const up = it.direction === "up";
         const mark = up ? "💖" : "💔";
         const badge = it.strength === "strong" ? `<span class="insight-badge">בולט</span>` : "";
+        const confidence = it.confidence && it.confidence.confidence_label;
+        const renderedBadge = useRevealed
+          ? `<span class="insight-badge">${escapeHtml(it.appearances)} הופעות</span>`
+            + (confidence ? `<span class="insight-badge">${escapeHtml(confidence)}</span>` : "")
+          : badge;
+        const text = useRevealed
+          ? `${it.feature} חזר בדייטים ${up ? "מוצלחים" : "שפחות נטו להצליח"}`
+          : it.text;
         return `<div class="insight insight--${up ? "up" : "down"}">`
           + `<span class="insight-mark">${mark}</span>`
-          + `<span class="insight-text">${escapeHtml(it.text)}</span>${badge}</div>`;
+          + `<span class="insight-text">${escapeHtml(text)}</span>${renderedBadge}</div>`;
       }).join("");
     }
 
@@ -222,7 +264,7 @@
       try {
         const data = await fetchInsights();
         hideBanner();
-        renderInsights(data.insights || [], data.n_dates);
+        renderInsights(data);
         renderAlignment(data.decision_alignment);
         renderWordcloud(data.heatmap || []);
         renderHeatmap(data.heatmap);
