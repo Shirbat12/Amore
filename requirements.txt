@@ -10,3 +10,4 @@ scikit-learn>=1.4
 google-genai>=0.3        # optional: only needed for real Gemini calls
 pytest>=8.0              # dev/testing
 httpx>=0.27             # dev/testing (FastAPI TestClient)
+openpyxl>=3.1            # read the questionnaire .xlsx data files

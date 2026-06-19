@@ -110,12 +110,13 @@ def _split_tags(value) -> List[str]:
 
     Handles comma-separated strings, semicolon-separated strings, and lists.
     """
-    if value is None or pd.isna(value):
-        return []
-
-    if isinstance(value, list):
+    # Lists/tuples must be checked first: pd.isna() on a sequence returns an
+    # array, whose truth value is ambiguous and would raise.
+    if isinstance(value, (list, tuple)):
         raw_values: Iterable = value
     else:
+        if value is None or pd.isna(value):
+            return []
         text = str(value).replace(";", ",").replace("\n", ",")
         raw_values = text.split(",")
 

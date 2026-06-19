@@ -180,6 +180,35 @@ def _empty_analysis(text: str = "") -> Dict:
     }
 
 
+# Offline fallback: when GEMINI_API_KEY is absent we still want the whole
+# questionnaire/dashboard pipeline to run (demos, CI, local dev). This returns
+# the exact shape of a real analysis using simple Hebrew keyword matching over
+# the closed tag list — deterministic, no network. Mirrors the offline mock in
+# server/nlp/gemini_client.py.
+def _mock_analysis(text: str) -> Dict:
+    found = []
+    for tag in CLOSED_TAGS_HE:
+        if tag in text and len(found) < 4:
+            found.append(tag)
+    positive = ["כיף", "נהדר", "מצחיק", "נעים", "מהמם", "חיבור", "זרם", "מקסים", "טוב", "כיפי"]
+    negative = ["משעמם", "מביך", "גרוע", "אכזבה", "קר", "מוזר", "לחוץ", "יבש"]
+    score = 0.0
+    if any(w in text for w in positive):
+        score += 0.5
+    if any(w in text for w in negative):
+        score -= 0.5
+    return {
+        "tags": found,
+        "sentiment": max(-1.0, min(1.0, score)),
+        "warmth_score": 0.0,
+        "agency_score": 0.0,
+        "summary": text[:80],
+        "evidence": found[0] if found else "",
+        "raw_text": text,
+        "parse_error": False,
+    }
+
+
 def _build_prompt(text: str) -> str:
     tag_list = "\n".join(f"  - {tag}" for tag in CLOSED_TAGS_HE)
 
@@ -235,8 +264,8 @@ def analyze_single_free_text(
 
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        logger.error("GEMINI_API_KEY is missing")
-        raise EnvironmentError("GEMINI_API_KEY missing – set it in .env")
+        logger.warning("GEMINI_API_KEY missing – using offline mock analysis")
+        return _mock_analysis(text)
 
     client = genai.Client(api_key=api_key)
     prompt = _build_prompt(text)
