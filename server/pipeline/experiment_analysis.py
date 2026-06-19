@@ -394,7 +394,7 @@ def analyze_questionnaire_experiment(
         "word_cloud": word_cloud,
     }
 
-    def build_word_cloud_from_preferences(revealed_preferences: Dict) -> Dict:
+def build_word_cloud_from_preferences(revealed_preferences: Dict) -> Dict:
     """
     Builds a dashboard-ready word cloud from positive revealed preferences.
     """
