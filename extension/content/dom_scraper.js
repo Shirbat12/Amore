@@ -18,7 +18,7 @@
 const SITES = {
   "okcupid.com": {
     // The profile card currently shown in the Double Take feed.
-    root: [".quickmatch-profiledetails", ".profile-content", "main"],
+    root: ["#profile", "main"],
     // "31 • Afridar" lives here — age is the leading number.
     ageLine: [".card-content-header__location"],
     // The four basics rows: gender/orientation, height/body, background, wiw.
@@ -43,7 +43,7 @@ const VALUE_MAP = [
   ["רווק", "status:single"], ["גרוש", "status:divorced"],
   // body
   ["בכושר", "body:fit"], ["רזה", "body:slim"], ["ממוצע", "body:average"],
-  ["שרירי", "body:athletic"], ["מלא", "body:curvy"],
+  ["שרירי", "body:athletic"],
   // language
   ["אנגלית", "language:english"], ["עברית", "language:hebrew"],
   ["צרפתית", "language:french"], ["רוסית", "language:russian"], ["ערבית", "language:arabic"],
