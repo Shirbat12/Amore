@@ -251,62 +251,44 @@ def build_dashboard(history: List[DateRecord]) -> Dict:
         "funnel": _funnel(history),
         "scatter": _scatter_predicted_vs_actual(history),
         "boxplots": _boxplots_by_tag(history),
-        "insights": _insights(corr),
+        "insights": [] if len(history) < 5 else _insights(corr),
     }
 
 
-def build_questionnaire_dashboard(
-    include_standard_dashboard: bool = True,
-    include_experiment_analysis: bool = True,
-) -> Dict:
+def build_questionnaire_dashboard(user_id: str | None = None) -> Dict:
     """
-    Dashboard based on real questionnaire data.
-
-    Parameters make development easier:
-    - include_standard_dashboard=False skips the older correlation dashboard.
-    - include_experiment_analysis=False skips the questionnaire analysis.
+    Dashboard based on the real questionnaire data.
+    If user_id is provided, filters questionnaire responses to that user.
     """
     from server.pipeline.questionnaire_loader import load_questionnaire_history
     from server.pipeline.experiment_analysis import analyze_questionnaire_experiment
 
     history, baseline_df, date_df = load_questionnaire_history()
 
-    dashboard: Dict = {"n_dates": len(history)}
+    if user_id is not None and "user_id" in date_df.columns:
+        user_date_df = date_df[date_df["user_id"] == user_id].copy()
 
-    if include_standard_dashboard:
-        dashboard.update(build_dashboard(history))
+        if "user_id" in baseline_df.columns:
+            user_baseline_df = baseline_df[baseline_df["user_id"] == user_id].copy()
+        else:
+            user_baseline_df = baseline_df.copy()
 
-    if include_experiment_analysis:
-        dashboard["experiment_analysis"] = analyze_questionnaire_experiment(
-            baseline_df=baseline_df,
-            date_df=date_df,
-        )
+        if len(user_date_df) > 0:
+            date_df = user_date_df
+            baseline_df = user_baseline_df
+            history = [d for d in history if d.user_id == user_id]
+
+    dashboard = build_dashboard(history)
+
+    dashboard["data_source"] = "questionnaire_responses"
+    dashboard["user"] = {
+        "user_id": user_id or "all_questionnaire_responses",
+        "display_name": user_id or "Questionnaire Demo User",
+    }
+
+    dashboard["experiment_analysis"] = analyze_questionnaire_experiment(
+        baseline_df=baseline_df,
+        date_df=date_df,
+    )
 
     return dashboard
-
-
-def build_questionnaire_overlay(profile_tokens: List[str]) -> Dict:
-    """
-    Build an overlay score that combines the predictor and questionnaire patterns.
-
-    Note: this can be expensive if experiment analysis triggers new Gemini calls.
-    With cache enabled in free_text_analysis.py it becomes fast after the first run.
-    """
-    from server.pipeline.questionnaire_loader import load_questionnaire_history
-    from server.pipeline.experiment_analysis import analyze_questionnaire_experiment
-
-    history, baseline_df, date_df = load_questionnaire_history()
-    base_overlay = build_overlay(history, profile_tokens)
-    experiment_analysis = analyze_questionnaire_experiment(baseline_df, date_df)
-    revealed_overlay = build_revealed_preference_overlay(profile_tokens, experiment_analysis)
-
-    combined_score = round(base_overlay["score"] * 0.6 + revealed_overlay["score"] * 0.4)
-
-    return {
-        "score": max(0, min(100, combined_score)),
-        "confidence": revealed_overlay["confidence"],
-        "base_overlay": base_overlay,
-        "revealed_preference_overlay": revealed_overlay,
-        "reasons": base_overlay.get("reasons", []) + revealed_overlay.get("reasons", []),
-        "warnings": revealed_overlay.get("warnings", []),
-    }
