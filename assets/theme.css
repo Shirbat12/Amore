@@ -258,3 +258,9 @@ textarea:focus, input[type="text"]:focus {
   font-size: 13.5px; line-height: 1.6; color: var(--ink);
 }
 .help-panel[hidden] { display: none; }
+
+/* ---- word cloud of the features that work for you ------------------------ */
+.cloud { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+         gap: 8px 16px; padding: 12px 6px; }
+.cloud-word { line-height: 1.1; cursor: default; transition: transform 0.15s ease; }
+.cloud-word:hover { transform: scale(1.08); }
