@@ -1,27 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&family=Frank+Ruhl+Libre:wght@500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="popup.css" />
   <title>A-MORE</title>
 </head>
 <body>
-  <h1>A-MORE</h1>
-  <label>API base
-    <input id="apiBase" type="text" placeholder="http://localhost:8000" />
+  <header class="head">
+    <h1 class="wordmark">A-MORE</h1>
+    <div class="rule"><span class="heart">&#9829;</span></div>
+    <p class="tagline">הגדרות התוסף</p>
+  </header>
+
+  <label>כתובת API
+    <input id="apiBase" type="text" placeholder="http://localhost:8000" aria-label="כתובת שרת API" />
   </label>
-  <label>Web base (dashboard & questionnaire)
-    <input id="webBase" type="text" placeholder="http://localhost:5500" />
+  <label>כתובת אתר (דאשבורד + שאלון)
+    <input id="webBase" type="text" placeholder="http://localhost:5500" aria-label="כתובת שרת הקבצים הסטטיים" />
   </label>
-  <label>User ID
-    <input id="userId" type="text" placeholder="demo_user" />
+  <label>מזהה משתמש
+    <input id="userId" type="text" placeholder="demo_user" aria-label="מזהה משתמש" />
   </label>
   <label class="row">
-    <input id="enabled" type="checkbox" checked /> Enabled
+    <input id="enabled" type="checkbox" checked aria-label="הפעלת התוסף" />
+    <span>התוסף פעיל</span>
   </label>
-  <button id="save">Save</button>
-  <a id="dashboard" href="#" target="_blank">Open dashboard →</a>
-  <p id="status"></p>
+
+  <button id="save" type="button">שמירה</button>
+  <p id="status" role="status"></p>
+
+  <nav class="links" aria-label="קישורים מהירים">
+    <a id="questionnaire" href="#" class="link-pill">📋 מילוי שאלון</a>
+    <a id="dashboard" href="#" class="link-pill">📊 דאשבורד</a>
+  </nav>
+
   <script src="popup.js"></script>
 </body>
 </html>

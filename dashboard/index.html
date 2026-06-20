@@ -109,11 +109,6 @@
     Chart.defaults.font.family = "'Rubik', system-ui, sans-serif";
     Chart.defaults.color = "#9a7c86";
 
-    // Show what we're pointing at up front — most "empty dashboard" problems are
-    // really a wrong ?user= or ?api= param, so make them visible immediately.
-    // API_BASE and USER_ID come from src/api.js (shared global scope).
-    subtitle.textContent = `${USER_ID} · ${API_BASE}`;
-
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, (c) =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -272,7 +267,9 @@
         renderFunnel(data.funnel);
         renderScatter(data.scatter);
         renderBoxplots(data.boxplots);
-        subtitle.textContent = `${USER_ID} · ${data.n_dates} דייטים · ${API_BASE}`;
+        subtitle.textContent = data.n_dates
+          ? `${data.n_dates} דייטים בניתוח`
+          : "התובנות האישיות שלך";
       } catch (err) {
         showError(err);
       }

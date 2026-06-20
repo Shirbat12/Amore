@@ -1,5 +1,13 @@
-// Popup: edit settings and link to the dashboard.
+// Popup: edit settings and open dashboard / questionnaire.
 const $ = (id) => document.getElementById(id);
+
+function readSettings() {
+  return {
+    api: $("apiBase").value.trim() || "http://localhost:8000",
+    web: $("webBase").value.trim() || "http://localhost:5500",
+    user: $("userId").value.trim() || "demo_user",
+  };
+}
 
 async function load() {
   const s = await chrome.storage.local.get(["apiBase", "webBase", "userId", "enabled"]);
@@ -10,24 +18,32 @@ async function load() {
 }
 
 $("save").addEventListener("click", async () => {
+  const { api, web, user } = readSettings();
   await chrome.storage.local.set({
-    apiBase: $("apiBase").value.trim(),
-    webBase: $("webBase").value.trim(),
-    userId: $("userId").value.trim(),
+    apiBase: api,
+    webBase: web,
+    userId: user,
     enabled: $("enabled").checked,
   });
-  $("status").textContent = "Saved.";
+  $("status").textContent = "נשמר ✓";
+  setTimeout(() => { $("status").textContent = ""; }, 2000);
 });
+
+function openPage(path, extraParams) {
+  const { api, web, user } = readSettings();
+  const q = new URLSearchParams({ api, user, ...extraParams });
+  chrome.tabs.create({ url: `${web}${path}?${q.toString()}` });
+}
 
 $("dashboard").addEventListener("click", (e) => {
   e.preventDefault();
-  const api = $("apiBase").value.trim() || "http://localhost:8000";
-  const web = $("webBase").value.trim() || "http://localhost:5500";
-  const user = $("userId").value.trim() || "demo_user";
-  // The static dashboard reads ?api= and ?user= query params.
-  chrome.tabs.create({
-    url: `${web}/dashboard/index.html?api=${encodeURIComponent(api)}&user=${encodeURIComponent(user)}`,
-  });
+  openPage("/dashboard/index.html");
+});
+
+$("questionnaire").addEventListener("click", (e) => {
+  e.preventDefault();
+  // No profile tokens from the popup — user fills after a date manually.
+  openPage("/questionnaire/vibe_form.html");
 });
 
 load();

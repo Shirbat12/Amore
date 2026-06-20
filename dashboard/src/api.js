@@ -16,7 +16,9 @@ function getUserIdFromPath() {
   const dashboardIndex = pathParts.indexOf("dashboard");
 
   if (dashboardIndex !== -1 && pathParts[dashboardIndex + 1]) {
-    return decodeURIComponent(pathParts[dashboardIndex + 1]).trim();
+    const segment = decodeURIComponent(pathParts[dashboardIndex + 1]).trim();
+    // /dashboard/index.html is a file — not a user id.
+    if (segment && !/\.html?$/i.test(segment)) return segment;
   }
 
   return null;
