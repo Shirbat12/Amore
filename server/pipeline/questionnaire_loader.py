@@ -34,6 +34,24 @@ def _anonymous_user_id(username: str) -> str:
     return hashlib.sha256(username.encode("utf-8")).hexdigest()[:10]
 
 
+def resolve_user_id(raw) -> str:
+    """Map any incoming identifier to the canonical anonymized user id.
+
+    The DB and the questionnaire data key every date by `_anonymous_user_id`
+    (a 10-char hash of the username/email), but clients pass an email or
+    username. This resolves either form to the same canonical id so the score,
+    insights and feedback paths all line up.
+
+    Idempotent: an already-anonymized 10-hex id is returned unchanged.
+    """
+    if raw is None:
+        return _anonymous_user_id("")
+    raw = str(raw).strip()
+    if len(raw) == 10 and all(c in "0123456789abcdef" for c in raw):
+        return raw  # already a canonical anon id
+    return _anonymous_user_id(raw)
+
+
 def _to_number(value, default: float = 0.0) -> float:
     number = pd.to_numeric(value, errors="coerce")
     if pd.isna(number):

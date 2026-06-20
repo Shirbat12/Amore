@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from server.db import relational
 from server.pipeline.presentation import build_overlay
+from server.pipeline.questionnaire_loader import resolve_user_id
 
 router = APIRouter(tags=["score"])
 
@@ -24,5 +25,5 @@ class ScoreRequest(BaseModel):
 
 @router.post("/score")
 def score(req: ScoreRequest) -> dict:
-    history = relational.get_history(req.user_id)
+    history = relational.get_history(resolve_user_id(req.user_id))
     return build_overlay(history, req.profile)
