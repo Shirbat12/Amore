@@ -270,22 +270,39 @@ def _revealed_preferences_from_history(history: List[DateRecord]) -> Dict:
     worse) dates become positive / negative patterns.
     """
     corr = learn_correlations(history)
-    appearances: Dict[str, int] = defaultdict(int)
+
+    # Count how often each feature appeared, per source (profile / topic / vibe).
+    app_profile: Dict[str, int] = defaultdict(int)
+    app_topic: Dict[str, int] = defaultdict(int)
+    app_dynamic: Dict[str, int] = defaultdict(int)
     for record in history:
         for token in set(record.profile):
-            appearances[token] += 1
+            app_profile[token] += 1
+        for tag in set(record.topic_tags):
+            app_topic[tag] += 1
+        for tag in set(record.vibe_tags):
+            app_dynamic[tag] += 1
+
+    # name-prefix -> (appearances map, feature-type label)
+    sources = {
+        "profile:": (app_profile, "מאפיין פרופיל"),
+        "topic:": (app_topic, "נושא שיחה"),
+        "dynamic:": (app_dynamic, "דינמיקה בדייט"),
+    }
 
     positive, negative = [], []
     for name, (rho, q_value) in corr.items():
-        if not name.startswith("profile:"):
+        match = next(((p, s) for p, s in sources.items() if name.startswith(p)), None)
+        if match is None:                   # e.g. 'trait:' / 'sentiment' -> skip
             continue
-        token = name.split("profile:", 1)[1]
-        count = appearances.get(token, 0)
+        prefix, (app_map, type_label) = match
+        key = name.split(prefix, 1)[1]
+        count = app_map.get(key, 0)
         if count < 2:                       # frontend ignores < 2 anyway
             continue
         pattern = {
-            "feature": _token_label(token),
-            "feature_type_label": "מאפיין פרופיל",
+            "feature": _token_label(key),
+            "feature_type_label": type_label,
             "appearances": count,
             "preference_strength": _safe_round(rho, 3),
             "confidence": _confidence_label(q_value),
