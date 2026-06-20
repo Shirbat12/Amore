@@ -12,6 +12,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from server.db import relational
+from server.pipeline.questionnaire_loader import resolve_user_id
 
 router = APIRouter(tags=["selection"])
 
@@ -24,5 +25,5 @@ class SelectionRequest(BaseModel):
 
 @router.post("/selection")
 def log_selection(req: SelectionRequest) -> dict:
-    relational.save_selection(req.user_id, req.action, req.profile)
+    relational.save_selection(resolve_user_id(req.user_id), req.action, req.profile)
     return {"status": "logged", "action": req.action, "n_tokens": len(req.profile)}

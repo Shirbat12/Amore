@@ -6,28 +6,27 @@ from fastapi import APIRouter
 from evaluation.kpis import decision_alignment_report
 from server.db import relational
 from server.pipeline.presentation import build_dashboard, build_questionnaire_dashboard
+from server.pipeline.questionnaire_loader import resolve_user_id
 
 router = APIRouter(tags=["insights"])
 
 
 @router.get("/insights/{user_id}")
 def insights(user_id: str) -> dict:
-    history = relational.get_history(user_id)
+    # Map the incoming email/username to the canonical anonymized id the DB uses.
+    uid = resolve_user_id(user_id)
+    history = relational.get_history(uid)
 
     if history:
-        selections = relational.get_selections(user_id)
+        selections = relational.get_selections(uid)
         payload = build_dashboard(history)
         payload["data_source"] = "sqlite_user_history"
         payload["user_id"] = user_id
         payload["decision_alignment"] = decision_alignment_report(history, selections)
         return payload
 
-    payload = build_questionnaire_dashboard(user_id=user_id)
+    payload = build_questionnaire_dashboard(user_id=uid)
     payload["data_source"] = "questionnaire_responses"
     payload["user_id"] = user_id
     payload["is_demo_fallback"] = True
     return payload
-
-    # Development/demo path: build the dashboard from the real questionnaire
-    # pipeline instead of synthetic sample_dates.json / generate_samples.py.
-    return build_questionnaire_dashboard(user_id=user_id)
