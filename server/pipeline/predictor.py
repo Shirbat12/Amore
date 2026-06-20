@@ -236,6 +236,6 @@ def population_reasons(profile_tokens: List[str]) -> List[Dict[str, object]]:
 
     if not reasons:
         reasons.append(
-            {"text": "הציון מבוסס על ממוצע כללי — עדיין נאסף מידע כדי לדייק אותו."}
+            {"text": "ציון ראשוני — מלאי שאלון אחרי הדייט כדי שנלמד מהתכונות בפרופיל."}
         )
     return reasons

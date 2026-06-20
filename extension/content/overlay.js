@@ -79,13 +79,38 @@ function linkStyle() {
     + "color:" + BRAND.roseDeep + ";background:" + BRAND.surface + ";";
 }
 
+function friendlyReason(text) {
+  if (!text) return text;
+  if (text.indexOf("ממוצע כללי") !== -1 || text.indexOf("נאסף מידע") !== -1) {
+    return "ציון ראשוני — אחרי הדייט מלאי 📋 שאלון כדי שנלמד מהפרופיל ונדייק.";
+  }
+  return text;
+}
+
+function reasonsHtml(result) {
+  const lowConf = result.confidence === "low";
+  if (lowConf) {
+    return '<p style="color:' + BRAND.mauve + ';font-size:12px;line-height:1.5;margin:6px 0 0;">'
+      + "ציון ראשוני — אחרי הדייט לחצי 📋 שאלון ונדייק לפי התכונות בפרופיל."
+      + "</p>";
+  }
+  const reasons = (result.reasons || []).map((r) =>
+    `<li>${friendlyReason(r.text)}</li>`).join("");
+  if (!reasons) return "";
+  return `<ul style="margin:6px 0 0;padding-inline-start:16px;color:${BRAND.ink};">${reasons}</ul>`;
+}
 function insightFromReasons(result) {
+  if (result && result.confidence === "low") {
+    return "ציון ראשוני — מלאי 📋 שאלון אחרי הדייט כדי שנלמד מהתכונות בפרופיל.";
+  }
   const reasons = (result && result.reasons) || [];
   const texts = [];
   for (let i = 0; i < reasons.length && texts.length < 2; i++) {
-    if (reasons[i].text) texts.push(reasons[i].text);
+    if (reasons[i].text) texts.push(friendlyReason(reasons[i].text));
   }
-  if (!texts.length) return "עדיין אין מספיק היסטוריה — נלמד מהשאלונים והתכונות בפרופיל.";
+  if (!texts.length) {
+    return "עדיין אין מספיק שאלונים — מלאי 📋 שאלון אחרי דייט.";
+  }
   return texts.join(" · ");
 }
 
@@ -124,16 +149,13 @@ function renderBadge(result, s, profile) {
     });
     document.body.appendChild(badge);
   }
-  const lowConf = result.confidence === "low";
-  const reasons = (result.reasons || []).map((r) => `<li>${r.text}</li>`).join("");
   const ls = linkStyle();
   badge.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;">
       <span style="font-weight:700;font-size:20px;color:${colorFor(result.score)}">${result.score}</span>
-      <span style="font-weight:600;color:${BRAND.roseDeep}">A-MORE match</span>
+      <span style="font-weight:600;color:${BRAND.roseDeep}">ציון התאמה</span>
     </div>
-    ${lowConf ? '<div style="color:' + BRAND.mauve + ';font-size:11px;">ביטחון נמוך — עדיין לומדים</div>' : ""}
-    ${reasons ? `<ul style="margin:6px 0 0;padding-inline-start:16px;color:${BRAND.ink};">${reasons}</ul>` : ""}
+    ${reasonsHtml(result)}
     <div id="amore-insight-box" hidden style="margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(246,227,220,.55);color:${BRAND.ink};font-size:12px;line-height:1.5;"></div>
     <div style="display:flex;gap:6px;margin-top:10px;" dir="rtl">
       <button type="button" id="amore-ai-btn" aria-label="תובנת AI על הפרופיל" style="${ls}cursor:pointer;">💬 תובנת AI</button>
