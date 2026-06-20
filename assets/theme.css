@@ -102,6 +102,10 @@ body {
   transition: transform 0.08s ease, background 0.2s ease;
 }
 .btn:active { transform: scale(0.98); }
+.btn:focus-visible, .btn-back:focus-visible, .pill:focus-visible, .help-btn:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 2px;
+}
 .btn-rose {
   background: var(--rose);
   color: #fff;
@@ -177,6 +181,11 @@ input[type="range"].vas::-moz-range-thumb {
   background: var(--surface);
   border: 2px solid var(--rose);
   cursor: pointer;
+}
+
+input[type="range"].vas:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 4px;
 }
 
 /* ---- text fields --------------------------------------------------------- */

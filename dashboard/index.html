@@ -138,7 +138,7 @@
         ${escapeHtml(err.message || err)}<br>
         ודאי שהשרת רץ (<code>uvicorn server.app:app --reload</code>) ושהפרמטרים נכונים —
         משתמש <code>${escapeHtml(USER_ID)}</code>, API <code>${escapeHtml(API_BASE)}</code>.
-        <br><br><button class="btn btn-rose" id="retry">נסי שוב</button>`;
+        <br><br><button class="btn btn-rose" id="retry" aria-label="נסי לטעון שוב">נסי שוב</button>`;
       document.getElementById("retry").addEventListener("click", load);
     }
 
