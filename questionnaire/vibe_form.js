@@ -3,12 +3,12 @@
 // final thank-you screen. Collects sliders + tag clouds + intent + free text and
 // POSTs to /feedback on submit.
 
-const params = new URLSearchParams(location.search);
-const API_BASE = params.get("api") || "http://localhost:8000";
-const USER_ID = params.get("user") || "demo_user";
+const _cfg = window.AMORE_CONFIG || { apiBase: "http://localhost:8000", userId: "demo_user" };
+const API_BASE = _cfg.apiBase;
+const USER_ID = _cfg.userId;
 // The profile scraped at match time is passed through so the saved record links
 // the dry features to this outcome.
-const PROFILE = (params.get("profile") || "").split(",").filter(Boolean);
+const PROFILE = (new URLSearchParams(location.search).get("profile") || "").split(",").filter(Boolean);
 
 const TOPIC_BANK = [
   "קריירה ועבודה", "טיולים וחו\\\"ל", "משפחה וילדות", "תחביבים ופנאי",

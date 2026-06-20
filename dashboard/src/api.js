@@ -3,9 +3,9 @@
 //   /dashboard/                  -> all questionnaire responses / demo user
 //   /dashboard/Yael.c40@gmail.com -> specific user
 
-const _params = new URLSearchParams(window.location.search);
+const _cfg = window.AMORE_CONFIG || { apiBase: "http://localhost:8000", userId: "demo_user" };
 
-const API_BASE = (_params.get("api") || "http://127.0.0.1:8000").replace(/\/$/, "");
+const API_BASE = _cfg.apiBase;
 
 function getUserIdFromPath() {
   const pathParts = window.location.pathname.split("/").filter(Boolean);
@@ -22,8 +22,7 @@ function getUserIdFromPath() {
   return null;
 }
 
-const USER_ID =
-  (_params.get("user") || getUserIdFromPath() || "demo_user").trim();
+const USER_ID = (getUserIdFromPath() || _cfg.userId || "demo_user").trim();
 
 async function fetchInsights() {
   const encodedUserId = encodeURIComponent(USER_ID);
