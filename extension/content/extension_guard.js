@@ -64,6 +64,15 @@
     }
   };
 
+  window.__amoreStorageSet = async function (data) {
+    if (!window.__amoreExtensionAlive()) return;
+    try {
+      await chrome.storage.local.set(data);
+    } catch (e) {
+      if (isInvalidatedError(e)) retire();
+    }
+  };
+
   window.__amoreStorageListen = function (listener) {
     if (!window.__amoreExtensionAlive()) return;
     try {

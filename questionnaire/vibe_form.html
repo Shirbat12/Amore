@@ -46,6 +46,10 @@
     .done .tags-found { color: var(--rose-deep); font-weight: 600; }
     .form-error { margin-top: 12px; padding: 10px 12px; border-radius: var(--r-sm);
                   background: #f7e0e0; color: #9b3b46; font-size: 14px; }
+    .profile-context { font-size: 13px; color: var(--mauve); margin: 0 0 16px; line-height: 1.5; }
+    .profile-context--warn { color: var(--rose-deep); background: var(--blush);
+                             border-radius: var(--r-sm); padding: 10px 12px; }
+    .profile-context .pill { cursor: default; font-size: 12px; margin: 2px; }
   </style>
 </head>
 <body>
@@ -57,6 +61,7 @@
       <h1 class="amore-wordmark">A-MORE</h1>
       <div class="rule"><span class="heart">&#9829;</span></div>
       <p class="lead">איך היה הדייט?</p>
+      <div id="profile_context" class="profile-context"></div>
       <p class="sub">4 שאלות קצרות וכמה מילים. לוקח פחות מדקה.</p>
       <button class="btn btn-rose" data-action="start" aria-label="התחלת השאלון">בואי נתחיל</button>
     </section>

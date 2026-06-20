@@ -10,6 +10,24 @@ const USER_ID = _cfg.userId;
 // the dry features to this outcome.
 const PROFILE = (new URLSearchParams(location.search).get("profile") || "").split(",").filter(Boolean);
 
+function renderProfileContext() {
+  const el = document.getElementById("profile_context");
+  if (!el) return;
+  if (!PROFILE.length) {
+    el.className = "profile-context profile-context--warn";
+    el.textContent = "השאלון לא מקושר לפרופיל. פתחי אותו מכפתור 📋 שאלון על פרופיל ב-OkCupid.";
+    return;
+  }
+  el.className = "profile-context";
+  let html = "מקושר לפרופיל: ";
+  for (let i = 0; i < PROFILE.length; i++) {
+    html += `<span class="pill">${PROFILE[i]}</span> `;
+  }
+  el.innerHTML = html;
+}
+
+renderProfileContext();
+
 const TOPIC_BANK = [
   "קריירה ועבודה", "טיולים וחו\\\"ל", "משפחה וילדות", "תחביבים ופנאי",
   "פוליטיקה ואקטואליה", "שיחת חולין", "תוכניות לעתיד", "הראה התעניינות כלפיי",

@@ -180,3 +180,12 @@ window.__amoreDebugScrape = function () {
   console.log("[A-MORE] scrape report:", report);
   return report;
 };
+
+// Lets the popup read the profile currently on screen (same tokens as the overlay).
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (msg.type !== "GET_PROFILE") return;
+  const profile = typeof window.__amoreScrapeProfile === "function"
+    ? window.__amoreScrapeProfile() : [];
+  sendResponse({ profile });
+  return true;
+});

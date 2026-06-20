@@ -1,13 +1,18 @@
 // Background service worker: the extension's hub (section 2.1).
 // Mediates between content scripts and the backend API, and caches recent scores.
 
-const DEFAULTS = { apiBase: "http://localhost:8000", userId: "demo_user" };
+importScripts("../defaults.js");
+
+const DEFAULTS = {
+  apiBase: AMORE_DEFAULTS.API_BASE,
+  userId: AMORE_DEFAULTS.USER_ID,
+};
 const cache = new Map(); // profile-key -> { result, ts }
 const TTL_MS = 60_000;
 
 async function settings() {
-  const stored = await chrome.storage.local.get(["apiBase", "userId"]);
-  return { ...DEFAULTS, ...stored };
+  const stored = await chrome.storage.local.get(["userId"]);
+  return { ...DEFAULTS, userId: stored.userId || DEFAULTS.userId };
 }
 
 async function fetchScore(profile) {

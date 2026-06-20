@@ -11,6 +11,12 @@ let lastProfile = [];
 let lastScoreResult = null;
 let pageObserver = null;
 
+const AMORE_DEFAULTS = {
+  API_BASE: "http://localhost:8000",
+  WEB_BASE: "http://localhost:5500",
+  USER_ID: "demo_user",
+};
+
 const BRAND = {
   surface: "#fffbf8",
   border: "rgba(194,161,90,.34)",
@@ -33,11 +39,11 @@ async function isEnabled() {
 }
 
 async function getSettings() {
-  const s = await window.__amoreStorageGet(["apiBase", "userId", "webBase"]);
+  const s = await window.__amoreStorageGet(["userId"]);
   return {
-    apiBase: s.apiBase || "http://localhost:8000",
-    userId: s.userId || "demo_user",
-    webBase: s.webBase || "http://localhost:5500",
+    apiBase: AMORE_DEFAULTS.API_BASE,
+    userId: s.userId || AMORE_DEFAULTS.USER_ID,
+    webBase: AMORE_DEFAULTS.WEB_BASE,
   };
 }
 
@@ -58,12 +64,12 @@ function stopOverlay() {
 window.__amoreOnRetire(stopOverlay);
 
 function questionnaireUrl(s, profile) {
-  const q = new URLSearchParams({ api: s.apiBase, user: s.userId, profile: profile.join(",") });
+  const q = new URLSearchParams({ user: s.userId, profile: profile.join(",") });
   return `${s.webBase}/questionnaire/vibe_form.html?${q.toString()}`;
 }
 
 function dashboardUrl(s) {
-  const q = new URLSearchParams({ api: s.apiBase, user: s.userId });
+  const q = new URLSearchParams({ user: s.userId });
   return `${s.webBase}/dashboard/index.html?${q.toString()}`;
 }
 
@@ -162,6 +168,7 @@ async function scoreCurrentProfile() {
   const profile = window.__amoreScrapeProfile();
   if (!profile.length) return;
   lastProfile = profile;
+  await window.__amoreStorageSet({ lastProfile: profile, lastProfileAt: Date.now() });
   const s = await getSettings();
   window.__amoreSendMessage({ type: "SCORE_PROFILE", profile }, (result) => {
     if (result && !result.error) renderBadge(result, s, profile);
