@@ -27,20 +27,41 @@ function colorFor(score) {
   return BRAND.roseDeep;
 }
 
+// After "Reload" in chrome://extensions, old tabs keep a dead content script.
+function extensionContextAlive() {
+  try {
+    return !!(chrome.runtime && chrome.runtime.id);
+  } catch (e) {
+    return false;
+  }
+}
+
 async function isEnabled() {
-  const { enabled } = await chrome.storage.local.get("enabled");
-  return enabled !== false;
+  if (!extensionContextAlive()) return false;
+  try {
+    const { enabled } = await chrome.storage.local.get("enabled");
+    return enabled !== false;
+  } catch (e) {
+    return false;
+  }
 }
 
 // Where things live. apiBase = backend; webBase = the static server that hosts
 // the dashboard + questionnaire pages. Both overridable from the popup.
 async function getSettings() {
-  const s = await chrome.storage.local.get(["apiBase", "userId", "webBase"]);
-  return {
-    apiBase: s.apiBase || "http://localhost:8000",
-    userId: s.userId || "demo_user",
-    webBase: s.webBase || "http://localhost:5500",
-  };
+  if (!extensionContextAlive()) {
+    return { apiBase: "http://localhost:8000", userId: "demo_user", webBase: "http://localhost:5500" };
+  }
+  try {
+    const s = await chrome.storage.local.get(["apiBase", "userId", "webBase"]);
+    return {
+      apiBase: s.apiBase || "http://localhost:8000",
+      userId: s.userId || "demo_user",
+      webBase: s.webBase || "http://localhost:5500",
+    };
+  } catch (e) {
+    return { apiBase: "http://localhost:8000", userId: "demo_user", webBase: "http://localhost:5500" };
+  }
 }
 
 function removeBadge() {
@@ -146,6 +167,7 @@ function renderBadge(result, s, profile) {
 }
 
 async function scoreCurrentProfile() {
+  if (!extensionContextAlive()) { removeBadge(); return; }
   if (!(await isEnabled())) { removeBadge(); return; }
   if (typeof window.__amoreScrapeProfile !== "function") return;
   const profile = window.__amoreScrapeProfile();
