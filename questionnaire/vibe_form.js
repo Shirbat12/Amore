@@ -3,9 +3,13 @@
 // final thank-you screen. Collects sliders + tag clouds + intent + free text and
 // POSTs to /feedback on submit.
 
-const _cfg = window.AMORE_CONFIG || { apiBase: "http://localhost:8000", userId: "demo_user" };
-const API_BASE = _cfg.apiBase;
-const USER_ID = _cfg.userId;
+const _cfg = window.AMORE_CONFIG || {};
+const _params = new URLSearchParams(location.search);
+// Prefer the URL params the extension overlay passes (?user= & ?api=); fall back
+// to any injected config, then to local-dev defaults. Without this, every
+// submission was saved under "demo_user" instead of the real profile's user.
+const API_BASE = _params.get("api") || _cfg.apiBase || "http://localhost:8000";
+const USER_ID = _params.get("user") || _cfg.userId || "demo_user";
 // The profile scraped at match time is passed through so the saved record links
 // the dry features to this outcome.
 const PROFILE = (new URLSearchParams(location.search).get("profile") || "").split(",").filter(Boolean);
