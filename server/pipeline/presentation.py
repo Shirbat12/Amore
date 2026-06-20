@@ -17,7 +17,12 @@ import pandas as pd
 
 from server import config
 from server.models import DateRecord
-from server.pipeline.predictor import fit_predictor, learn_correlations, score_profile
+from server.pipeline.predictor import (
+    fit_predictor,
+    learn_correlations,
+    population_reasons,
+    score_profile,
+)
 
 
 def _safe_round(value, digits: int = 2):
@@ -38,12 +43,18 @@ def _token_label(token: str) -> str:
 
 
 def build_overlay(history: List[DateRecord], profile_tokens: List[str]) -> Dict:
-    """Payload the extension paints on top of a profile using the predictor."""
+    """Payload the extension paints on top of a profile using the predictor.
+
+    If the user has too little personal history for per-user reasons (the common
+    case in the pilot), fall back to population-level tendencies so the overlay
+    always shows a 'why' line under the score.
+    """
     result = score_profile(history, profile_tokens)
+    reasons = result["reasons"] or population_reasons(profile_tokens)
     return {
         "score": result["score"],
         "confidence": result["confidence"],
-        "reasons": result["reasons"],
+        "reasons": reasons,
     }
 
 

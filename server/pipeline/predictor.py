@@ -159,10 +159,11 @@ def score_profile(
         )
         for name, rho, q in ranked[:3]:
             token = name.split("profile:", 1)[1]
-            direction = "raises" if rho > 0 else "lowers"
+            label = token.split(":")[-1].strip()
+            direction = "טובים" if rho > 0 else "פחות טובים"
             reasons.append(
                 {"feature": token, "rho": round(rho, 2), "q": round(q, 3),
-                 "text": f"'{token}' {direction} your typical vibe (rho={rho:.2f})"}
+                 "text": f"'{label}' קשור אצלך לדייטים {direction} יותר."}
             )
 
     return {
@@ -171,3 +172,60 @@ def score_profile(
         "n_dates": len(history),
         "reasons": reasons,
     }
+
+
+# ----------------------------------------------------------------------------
+# Population-level explanation (when a user has too little personal history)
+# ----------------------------------------------------------------------------
+# Below this |rho| the directional signal is too weak to be worth mentioning.
+_MIN_REASON_RHO = 0.2
+_POP_CACHE: Dict[str, object] = {}
+
+
+def _population_correlations() -> Dict[str, Tuple[float, float]]:
+    """Spearman/FDR correlations learned across ALL collected dates (cached once).
+
+    This lets us explain a score even for a brand-new user with no personal
+    history. Falls back to empty if the questionnaire data can't be loaded.
+    """
+    if "corr" not in _POP_CACHE:
+        try:
+            from server.pipeline.questionnaire_loader import load_questionnaire_history
+            records, _, _ = load_questionnaire_history()
+            _POP_CACHE["corr"] = learn_correlations(records) if len(records) >= 2 else {}
+        except Exception:  # noqa: BLE001 - missing data file etc. -> no reasons
+            _POP_CACHE["corr"] = {}
+    return _POP_CACHE["corr"]  # type: ignore[return-value]
+
+
+def population_reasons(profile_tokens: List[str]) -> List[Dict[str, object]]:
+    """Honest, hedged Hebrew explanation for a score, from the pooled pilot data.
+
+    The pilot sample is small and these correlations are NOT yet statistically
+    significant, so the wording is deliberately phrased as *tendencies from a
+    small sample* - never as proven facts.
+    """
+    corr = _population_correlations()
+    present = []
+    for token in profile_tokens:
+        key = f"profile:{token}"
+        if key in corr:
+            rho, q = corr[key]
+            if abs(rho) >= _MIN_REASON_RHO:
+                present.append((token, rho, q))
+    present.sort(key=lambda r: abs(r[1]), reverse=True)
+
+    reasons: List[Dict[str, object]] = []
+    for token, rho, q in present[:2]:
+        label = token.split(":")[-1].strip()
+        tendency = "טובים יותר" if rho > 0 else "פחות טובים"
+        reasons.append({
+            "feature": token, "rho": round(rho, 2),
+            "text": f"לפי הנתונים שנאספו עד כה (מדגם קטן), '{label}' נוטה להופיע בדייטים {tendency}.",
+        })
+
+    if not reasons:
+        reasons.append(
+            {"text": "הציון מבוסס על ממוצע כללי — עדיין נאסף מידע כדי לדייק אותו."}
+        )
+    return reasons
