@@ -38,6 +38,16 @@ def _explanatory_columns(history: List[DateRecord]) -> Tuple[Dict[str, list], li
         col = [1 if tag in d.tags else 0 for d in history]
         if any(col):                              # skip tags never seen
             columns[f"trait:{tag}"] = col
+    # The questionnaire reliably captures conversation-topic and date-vibe tags
+    # even when no profile was scraped, so use them as explanatory features too.
+    for topic in sorted({t for d in history for t in d.topic_tags}):
+        col = [1 if topic in d.topic_tags else 0 for d in history]
+        if any(col):
+            columns[f"topic:{topic}"] = col
+    for vibe in sorted({t for d in history for t in d.vibe_tags}):
+        col = [1 if vibe in d.vibe_tags else 0 for d in history]
+        if any(col):
+            columns[f"dynamic:{vibe}"] = col
     columns["sentiment"] = [d.sentiment for d in history]
     y = [d.vas for d in history]
     return columns, y
