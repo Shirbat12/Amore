@@ -1,3 +1,10 @@
+function emptyNote() {
+  const p = document.createElement("p");
+  p.className = "empty";
+  p.textContent = "עדיין אין מספיק נתונים לגרף הזה 💫";
+  return p;
+}
+
 // Predicted vs actual VAS — the visual form of prediction accuracy (2.3.4).
 function renderScatter(points) {
   const el = document.getElementById("scatter");

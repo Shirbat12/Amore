@@ -1,3 +1,10 @@
+function emptyNote() {
+  const p = document.createElement("p");
+  p.className = "empty";
+  p.textContent = "עדיין אין מספיק נתונים לגרף הזה 💫";
+  return p;
+}
+
 // VAS distribution per character tag, drawn as real box-and-whisker plots using
 // the chartjs-chart-boxplot plugin (it registers a "boxplot" chart type with
 // Chart.js). The plugin computes quartiles, median, whiskers and outliers from

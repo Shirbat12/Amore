@@ -23,6 +23,6 @@ function renderHeatmap(rows) {
 function emptyNote() {
   const p = document.createElement("p");
   p.className = "empty";
-  p.textContent = "אין עדיין מספיק נתונים.";
+  p.textContent = "עדיין אין מספיק נתונים לגרף הזה 💫";
   return p;
 }

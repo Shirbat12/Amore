@@ -1,3 +1,10 @@
+function emptyNote() {
+  const p = document.createElement("p");
+  p.className = "empty";
+  p.textContent = "עדיין אין מספיק נתונים לגרף הזה 💫";
+  return p;
+}
+
 // First dates -> second-date intent (section 2.3.4), in the brand palette.
 function renderFunnel(f) {
   const el = document.getElementById("funnel");

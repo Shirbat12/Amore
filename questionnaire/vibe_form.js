@@ -77,9 +77,18 @@ function buildTags(containerId, counterId, bank, bucket) {
     const b = document.createElement("button");
     b.className = "pill";
     b.textContent = tag;
+    b.setAttribute("aria-label", "בחירת תגית: " + tag);
+    b.setAttribute("aria-pressed", "false");
     b.addEventListener("click", () => {
-      if (bucket.has(tag)) { bucket.delete(tag); b.classList.remove("on"); }
-      else if (bucket.size < 3) { bucket.add(tag); b.classList.add("on"); }
+      if (bucket.has(tag)) {
+        bucket.delete(tag);
+        b.classList.remove("on");
+        b.setAttribute("aria-pressed", "false");
+      } else if (bucket.size < 3) {
+        bucket.add(tag);
+        b.classList.add("on");
+        b.setAttribute("aria-pressed", "true");
+      }
       updateCounter();
     });
     root.appendChild(b);
@@ -125,6 +134,8 @@ async function submit() {
     free_text: document.getElementById("free_text").value.trim(),
   };
 
+  const errorBox = document.getElementById("form_error");
+  errorBox.hidden = true;
   submitBtn.disabled = true;
   submitBtn.textContent = "שולחת…";
   try {
@@ -139,11 +150,12 @@ async function submit() {
     document.getElementById("done_msg").innerHTML = tags
       ? `הדייט נשמר. תגיות שזיהינו: <span class="tags-found">${tags}</span>`
       : "הדייט נשמר. נדייק לך את ההמלצות.";
+    errorBox.hidden = true;
     next(); // move to the thank-you screen
   } catch (e) {
     submitBtn.disabled = false;
     submitBtn.textContent = "שליחה";
-    alert("שגיאה בשליחה. ודאי שהשרת רץ.");
+    errorBox.hidden = false;
   }
 }
 
