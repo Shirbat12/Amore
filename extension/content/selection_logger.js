@@ -1,3 +1,7 @@
+// DISABLED — A-MORE learns only from post-date questionnaires + dry profile
+// tokens (not Like/Pass swipes). This file is kept for reference; it is not
+// loaded from manifest.json.
+//
 // Content script: log which profiles the user accepts or rejects (section 4.1,
 // Decision-Alignment KPI). When the user clicks Like or Pass on the profile
 // that's currently on screen, we scrape its dry tokens and send {action,

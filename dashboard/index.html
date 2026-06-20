@@ -45,10 +45,6 @@
       <p class="insights-stat" id="insights_stat"></p>
       <div class="insights" id="insights"></div>
     </section>
-    <section class="card full" id="alignment_card">
-      <h2 class="card-title">תאמו לדפוסים המוצלחים שלך</h2>
-      <div id="alignment_body"></div>
-    </section>
     <section class="card full" id="cloud_card">
       <h2 class="card-title">התכונות שעובדות לך</h2>
       <p class="card-sub">ככל שהמילה גדולה יותר — הקשר חזק יותר. ורוד = מיטיב לך, אפור = פחות.</p>
@@ -198,12 +194,6 @@
       }).join("");
     }
 
-    // Decision-Alignment KPI (section 4.1): how often the user liked profiles
-    // carrying a feature their own history proves works for them. A circular
-    // gauge for the rate, plain-language framing, and the endorsed features.
-    // Word cloud of the learned features: word size = strength of the link
-    // (|rho|), color = direction (rose helps you, slate hurts). Biggest word =
-    // strongest signal — the playful, at-a-glance read of the heatmap.
     function renderWordcloud(rows) {
       const body = document.getElementById("cloud_body");
       if (!rows.length) {
@@ -225,43 +215,12 @@
       }).join("");
     }
 
-    function renderAlignment(da) {
-      const card = document.getElementById("alignment_card");
-      const body = document.getElementById("alignment_body");
-      if (!da) { card.style.display = "none"; return; }   // older backend: hide gracefully
-      card.style.display = "";
-      if (da.rate === null || da.rate === undefined) {
-        body.innerHTML = `<p class="empty">עדיין אין מספיק לייקים כדי לחשב יישור — תני לתוסף לאסוף עוד החלקות 💫</p>`;
-        return;
-      }
-      const pct = Math.round(da.rate);
-      const r = 46, C = 2 * Math.PI * r, off = C * (1 - pct / 100);
-      const feats = (da.positive_features || []).slice(0, 8)
-        .map((f) => `<span class="pill">${escapeHtml(f.split(":").pop())}</span>`).join("");
-      body.innerHTML = `
-        <div class="align-row">
-          <div class="gauge">
-            <svg width="120" height="120" viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="${r}" fill="none" style="stroke: var(--gold-line)" stroke-width="10"></circle>
-              <circle cx="60" cy="60" r="${r}" fill="none" style="stroke: var(--rose)" stroke-width="10"
-                      stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"></circle>
-            </svg>
-            <div class="gauge-num">${pct}%</div>
-          </div>
-          <div class="align-text">
-            <p>מתוך <b>${da.n_selected}</b> פרופילים שאהבת, <b>${pct}%</b> תאמו לדפוסים שעובדים לך 💘</p>
-            ${feats ? `<div class="align-label">המאפיינים שמתאימים לך:</div><div class="align-feats">${feats}</div>` : ""}
-          </div>
-        </div>`;
-    }
-
     async function load() {
       showLoading();
       try {
         const data = await fetchInsights();
         hideBanner();
         renderInsights(data);
-        renderAlignment(data.decision_alignment);
         renderWordcloud(data.heatmap || []);
         renderHeatmap(data.heatmap);
         renderFunnel(data.funnel);

@@ -85,7 +85,7 @@ function insightFromReasons(result) {
   for (let i = 0; i < reasons.length && texts.length < 2; i++) {
     if (reasons[i].text) texts.push(reasons[i].text);
   }
-  if (!texts.length) return "עדיין אין מספיק היסטוריה — נלמד מהבחירות והשאלונים שלך.";
+  if (!texts.length) return "עדיין אין מספיק היסטוריה — נלמד מהשאלונים והתכונות בפרופיל.";
   return texts.join(" · ");
 }
 

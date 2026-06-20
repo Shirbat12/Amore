@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from evaluation.kpis import decision_alignment_report
 from server.db import relational
 from server.pipeline.presentation import build_dashboard, build_questionnaire_dashboard
 from server.pipeline.questionnaire_loader import resolve_user_id
@@ -18,11 +17,9 @@ def insights(user_id: str) -> dict:
     history = relational.get_history(uid)
 
     if history:
-        selections = relational.get_selections(uid)
         payload = build_dashboard(history)
         payload["data_source"] = "sqlite_user_history"
         payload["user_id"] = user_id
-        payload["decision_alignment"] = decision_alignment_report(history, selections)
         return payload
 
     payload = build_questionnaire_dashboard(user_id=uid)
