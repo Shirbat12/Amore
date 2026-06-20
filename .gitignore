@@ -10,6 +10,9 @@ env/
 # A-MORE local data store (sqlite + json documents)
 .data/
 
+# Generated validation plots (regenerate with: python -m evaluation.validate_real_data)
+evaluation/reports/
+
 # Secrets
 .env
 
