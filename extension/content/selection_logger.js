@@ -33,8 +33,8 @@ function selectionConfig() {
 
 // Respect the same on/off switch as the overlay.
 async function selectionEnabled() {
-  const { enabled } = await chrome.storage.local.get("enabled");
-  return enabled !== false;
+  const s = await window.__amoreStorageGet("enabled");
+  return s.enabled !== false;
 }
 
 // True if the clicked node, or any ancestor, matches a selector in the list.
@@ -57,6 +57,7 @@ function tooSoon() {
 }
 
 async function onClick(e) {
+  if (!window.__amoreExtensionAlive()) return;
   const cfg = selectionConfig();
   if (!cfg) return;
   if (!(await selectionEnabled())) return;
@@ -71,10 +72,13 @@ async function onClick(e) {
   const profile = window.__amoreScrapeProfile();
   if (!profile.length) return;
 
-  // Fire-and-forget: never block the user's swipe on the network round-trip.
-  chrome.runtime.sendMessage({ type: "LOG_SELECTION", action, profile });
+  window.__amoreSendMessage({ type: "LOG_SELECTION", action, profile });
   console.debug("[A-MORE] selection:", action, profile);
 }
+
+window.__amoreOnRetire(function () {
+  document.removeEventListener("click", onClick, true);
+});
 
 // Capture phase so we still see the click even if the app stops propagation.
 document.addEventListener("click", onClick, true);

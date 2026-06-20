@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "A-MORE",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Real-time, personalized match score on top of dating-app profiles.",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [
@@ -15,6 +15,7 @@
     {
       "matches": ["https://*.okcupid.com/*"],
       "js": [
+        "content/extension_guard.js",
         "content/dom_scraper.js",
         "content/overlay.js",
         "content/selection_logger.js"

@@ -7,10 +7,10 @@
 // "Enabled" switch and re-scores when the visible profile changes.
 
 const BADGE_ID = "amore-overlay-badge";
-let lastProfile = []; // tokens of the profile currently shown (for the links)
+let lastProfile = [];
 let lastScoreResult = null;
+let pageObserver = null;
 
-// Brand palette (matches assets/theme.css — content scripts can't import it).
 const BRAND = {
   surface: "#fffbf8",
   border: "rgba(194,161,90,.34)",
@@ -27,41 +27,18 @@ function colorFor(score) {
   return BRAND.roseDeep;
 }
 
-// After "Reload" in chrome://extensions, old tabs keep a dead content script.
-function extensionContextAlive() {
-  try {
-    return !!(chrome.runtime && chrome.runtime.id);
-  } catch (e) {
-    return false;
-  }
-}
-
 async function isEnabled() {
-  if (!extensionContextAlive()) return false;
-  try {
-    const { enabled } = await chrome.storage.local.get("enabled");
-    return enabled !== false;
-  } catch (e) {
-    return false;
-  }
+  const s = await window.__amoreStorageGet("enabled");
+  return s.enabled !== false;
 }
 
-// Where things live. apiBase = backend; webBase = the static server that hosts
-// the dashboard + questionnaire pages. Both overridable from the popup.
 async function getSettings() {
-  if (!extensionContextAlive()) {
-    return { apiBase: "http://localhost:8000", userId: "demo_user", webBase: "http://localhost:5500" };
-  }
-  try {
-    const s = await chrome.storage.local.get(["apiBase", "userId", "webBase"]);
-    return {
-      apiBase: s.apiBase || "http://localhost:8000",
-      userId: s.userId || "demo_user",
-      webBase: s.webBase || "http://localhost:5500",
-    };
-  } catch (e) {
-    return { apiBase: "http://localhost:8000", userId: "demo_user", webBase: "http://localhost:5500" };
-  }
+  const s = await window.__amoreStorageGet(["apiBase", "userId", "webBase"]);
+  return {
+    apiBase: s.apiBase || "http://localhost:8000",
+    userId: s.userId || "demo_user",
+    webBase: s.webBase || "http://localhost:5500",
+  };
 }
 
 function removeBadge() {
@@ -69,8 +46,17 @@ function removeBadge() {
   if (badge) badge.remove();
 }
 
-// Questionnaire URL carrying this profile's tokens, so the feedback the user
-// submits is linked to the exact profile they just saw (closes the loop).
+function stopOverlay() {
+  removeBadge();
+  if (pageObserver) {
+    pageObserver.disconnect();
+    pageObserver = null;
+  }
+  clearTimeout(window.__amoreDebounce);
+}
+
+window.__amoreOnRetire(stopOverlay);
+
 function questionnaireUrl(s, profile) {
   const q = new URLSearchParams({ api: s.apiBase, user: s.userId, profile: profile.join(",") });
   return `${s.webBase}/questionnaire/vibe_form.html?${q.toString()}`;
@@ -167,29 +153,35 @@ function renderBadge(result, s, profile) {
 }
 
 async function scoreCurrentProfile() {
-  if (!extensionContextAlive()) { removeBadge(); return; }
-  if (!(await isEnabled())) { removeBadge(); return; }
+  if (!window.__amoreExtensionAlive()) return;
+  if (!(await isEnabled())) {
+    removeBadge();
+    return;
+  }
   if (typeof window.__amoreScrapeProfile !== "function") return;
   const profile = window.__amoreScrapeProfile();
   if (!profile.length) return;
   lastProfile = profile;
   const s = await getSettings();
-  chrome.runtime.sendMessage({ type: "SCORE_PROFILE", profile }, (result) => {
+  window.__amoreSendMessage({ type: "SCORE_PROFILE", profile }, (result) => {
     if (result && !result.error) renderBadge(result, s, profile);
   });
 }
 
-// Initial run + react to SPA navigation / card swaps.
-scoreCurrentProfile();
-const observer = new MutationObserver(() => {
+function scheduleScore() {
+  if (!window.__amoreExtensionAlive()) return;
   clearTimeout(window.__amoreDebounce);
   window.__amoreDebounce = setTimeout(scoreCurrentProfile, 600);
-});
-observer.observe(document.body, { childList: true, subtree: true });
+}
 
-// React the moment the user flips the switch in the popup.
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== "local" || !("enabled" in changes)) return;
-  if (changes.enabled.newValue === false) removeBadge();
-  else scoreCurrentProfile();
-});
+if (window.__amoreExtensionAlive()) {
+  scoreCurrentProfile();
+  pageObserver = new MutationObserver(scheduleScore);
+  pageObserver.observe(document.body, { childList: true, subtree: true });
+
+  window.__amoreStorageListen(function (changes, area) {
+    if (area !== "local" || !("enabled" in changes)) return;
+    if (changes.enabled.newValue === false) removeBadge();
+    else scoreCurrentProfile();
+  });
+}
