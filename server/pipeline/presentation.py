@@ -252,6 +252,51 @@ def _insights(corr: Dict[str, tuple], max_items: int = 5) -> List[Dict]:
 # ============================================================
 
 
+def _confidence_label(q_value: float) -> Dict[str, str]:
+    if q_value <= config.SIGNIFICANT_Q:
+        return {"confidence_level": "high", "confidence_label": "ביטחון גבוה"}
+    if q_value <= 0.3:
+        return {"confidence_level": "medium", "confidence_label": "ביטחון בינוני"}
+    return {"confidence_level": "low", "confidence_label": "כיוון ראשוני"}
+
+
+def _revealed_preferences_from_history(history: List[DateRecord]) -> Dict:
+    """Build the revealed-preference patterns the dashboard renders as 'AI insights'.
+
+    The questionnaire pipeline produces this from the .xlsx, but users whose dates
+    live in the DB never went through it - so without this they'd see no AI
+    insights. Here we derive the same shape from the DB history using the per-user
+    correlations: profile features that consistently co-occur with better (or
+    worse) dates become positive / negative patterns.
+    """
+    corr = learn_correlations(history)
+    appearances: Dict[str, int] = defaultdict(int)
+    for record in history:
+        for token in set(record.profile):
+            appearances[token] += 1
+
+    positive, negative = [], []
+    for name, (rho, q_value) in corr.items():
+        if not name.startswith("profile:"):
+            continue
+        token = name.split("profile:", 1)[1]
+        count = appearances.get(token, 0)
+        if count < 2:                       # frontend ignores < 2 anyway
+            continue
+        pattern = {
+            "feature": _token_label(token),
+            "feature_type_label": "מאפיין פרופיל",
+            "appearances": count,
+            "preference_strength": _safe_round(rho, 3),
+            "confidence": _confidence_label(q_value),
+        }
+        (positive if rho > 0 else negative).append(pattern)
+
+    positive.sort(key=lambda p: p["preference_strength"], reverse=True)
+    negative.sort(key=lambda p: p["preference_strength"])
+    return {"positive_patterns": positive, "negative_patterns": negative}
+
+
 def build_dashboard(history: List[DateRecord]) -> Dict:
     """Full standard dashboard payload returned by /insights."""
     corr = learn_correlations(history) if len(history) >= 2 else {}
@@ -263,6 +308,10 @@ def build_dashboard(history: List[DateRecord]) -> Dict:
         "scatter": _scatter_predicted_vs_actual(history),
         "boxplots": _boxplots_by_tag(history),
         "insights": [] if len(history) < 5 else _insights(corr),
+        # Give DB-history users the same "AI insights" the questionnaire path has.
+        "experiment_analysis": {
+            "revealed_preferences": _revealed_preferences_from_history(history)
+        },
     }
 
 
